@@ -1,0 +1,6 @@
+# Latex-related generated files (in any folder)
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc

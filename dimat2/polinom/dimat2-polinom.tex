@@ -1,0 +1,606 @@
+% !TeX spellcheck = hu_HU
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[magyar]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\usepackage{outlines}
+\usepackage{hyperref}
+
+\hyphenpenalty=10000
+
+\begin{document}
+
+\begin{center}
+	\huge
+	Diszkrét matematika II\\
+	\vspace{1mm}
+	\LARGE
+	Polinomok témakör jegyzete\\
+	\vspace{5mm}
+	\large
+	Készült Burcsi Péter előadásai\\
+	és Harrison-Juhász Zsófia gyakorlatai alapján\\
+	\vspace{5mm}
+	Sárközi Gergő, 2021-22-1. félév\\
+	Nincsen lektorálva!
+\end{center}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Gyűrű, Test, integritási tartomány}
+
+\subsection{Gyűrű ($R,+,*$)}
+
+\begin{outline}
+	\1 Példa: $\mathbb{Z}$, $\mathbb{Q}$, $\mathbb{R}$, $\mathbb{C}$, $\mathbb{Z}_m$ (mod m maradékosztályok gyűrűje)
+	\1 $+$: R-en művelet
+		\2 asszociatív, kommutatív
+		\2 létezik nullelem: 0 ($a+0=0+a=a$)
+		\2 minden elemnek van inverze ($a-a=0$)
+	\1 $*$: R-en művelet
+		\2 asszociatív
+		\2 nem feltétlenül kommutatív (pl. mátrixok miatt: ott nem azok)
+	\1 $*,+$: $*$ disztributív $+$-ra: $x*(y+z)=x*y+x*z$
+\end{outline}
+
+\subsection{Integritási tartomány}
+
+\begin{outline}
+	\1 Példa: $\mathbb{Z}$, $\mathbb{Q}$, $\mathbb{R}$, $\mathbb{C}$, $\mathbb{Z}_p$ ahol p egy prím
+	\1 Egy R gyűrű integritási tartomány, ha:
+		\2 legalább 2 eleme van
+		\2 szorzás kommutatív
+		\2 gyűrű (szorzás) nullosztómentes ($a*b=0 \implies a=0 \lor b=0$)
+			\3 ellenpélda: $\mathbb{Z}_{10}$: $6*5=0$
+\end{outline}
+
+\subsection{Egységelemes Integritási Tartomány (EIT)}
+
+\begin{outline}
+	\1 Integritási tartomány, ahol létezik $1 \in R$: $a*1=1*a=a$
+	\1 Van $+,*,-$: ahogy megszoktuk, pl.: $ax=ay \implies a=0 \lor x=y$
+\end{outline}
+
+\subsection{Test}
+
+\begin{outline}
+	\1 Gyakorlatilag: egy E.I.T. ahol van osztás
+	\1 $\forall a \in R: a \ne 0 \implies \exists a^{-1}: a*a^{-1}=1$
+	\1 pl.: $\mathbb{Q}$, $\mathbb{R}$, $\mathbb{Z}_p$ ahol $p$ prím
+	\1 Minden $f$ polinom elosztható maradékosan bármely $g \ne 0$ polinommal
+\end{outline}
+
+\pagebreak
+
+\section{Polinom}
+
+\begin{outline}
+	\1 Egy R gyűrű feletti polinomokon olyan $(f_0,f_1,f_2,...)$ végtelen sorozatokat értünk,
+	ahol $f_j \in R$ és $\exists n \in \mathbb{N}: j>n \implies f_j=0$
+	\1 Példa: $6+5x+2x^2+3x^4$ $\to$ $(6,5,2,0,3,0,0,0,...)$
+	\1 R feletti polinomok halmaza: $R[x]$ (x: polinomok határozatlanja)
+		\2 Ha R E.I.T., akkor $R[x]$ is E.I.T.
+	\1 Polinomfüggvény: $f \in R \to R$, $f(r)=f_0+f_1*r+...+f_{deg(f)}*r^{deg(f)}$
+\end{outline}
+
+\subsection{Polinom foka}
+
+\begin{outline}
+	\1 polinom foka ($\deg f$): legnagyobb $n$ amelyre $f_n \ne 0$
+		\2 a fok $-\infty$, ha $f=(0,0,0,...)$
+	\1 főegyüttható: $f_n$ ahol $n=\deg f$
+	\1 konstans tag: $f_0$
+	\1 f lineáris, ha $\deg f \le 1$
+	\1 f konstants, ha $\deg f \le 0$
+\end{outline}
+
+\subsection{Összeadás, szorzás $R[x]$-en}
+
+\begin{outline}
+	\1 $f=(f_0,f_1,f_2,...)$ és $g=(g_0,g_1,...)$
+	\1 $f+g=(f_0+g_0,f_1+g_1,...)$
+		\2 $deg (f+g) \le max(deg(f),\; deg(g))$
+	\1 $f*g=h$ ahol: $h_k=\sum_{i+j=k}f_i*g_j$
+		\2 Példa: $f=(2,0,1,3,0,...)$ és $g=(7,-2,3,0,...)$\\
+		$f*g=(?,2*3+0*-2+1*7,...)=(?,f_0*g_2+f_1*g_1+f_2*g_0,...)$
+		\2 $\deg (f*g) \le \deg(f)+\deg(g)$
+			\3 egyenlő, ha $R$ egy integritási tartomány: $f_{\deg(f)}*g_{\deg(g)} \ne 0$
+\end{outline}
+
+\subsection{Maradékos osztás tétele}
+
+\begin{outline}
+	\1 Legyen $R$ egy E.I.T. és $f,g \in R[x]$ és $n=\deg f$ és $m = \deg g$
+	\1 Ha $\exists {g_m}^{-1}$ (van reciproka a főegyütthatónak)
+	\1 Akkor $\exists! g,r \in R[x]: f = g*q+r \wedge \deg r < \deg g$
+	\1 Egyértelműség bizonyítása:
+		\2 Legyen $f=g*q_1+r_1=g*q_2+r_2$
+		\2 Ebből következik: $g*(q_1-q_2)=r_2-r_1$
+		\2 Fokokra áttérve: $\deg g + \deg (q_1 - q_2) = \deg (r_2 - r_1)$
+		\2 Ha $q_1 \ne q_2$: a bal oldal $\ge \deg g$, a jobb oldal $< \deg g$
+		\2 Tehát $(q_1 = q_2) \implies (g*0=0) \implies (r_r - r_2 = 0)$
+	\1 Létezés bizonyítása:
+		\2 $q = f_n*g_m^{-1}*x^{n-m}+q^*$ \;\; (ahol $q^*$ ugyan ez $f^*$-gal)
+		\2 $f^*=f-g*f_n*g_m^{-1}*x^{n-m} = g*q^*+r^*$
+		\2 Rekurzió alapesete: ha $\deg f < \deg g$ akkor $q=0$ és $r=f$
+		\2 $f$ fokszáma csökken, $\deg f^* < \deg f$ belátása:\\
+		$f^*_n=f_n*x^n-g*f_n*g_m^{-1}*x^{n-m} = f_n*x^n-f_n*x^n = 0$
+\end{outline}
+
+\subsection{Polinom osztás a gyakorlatban}
+
+\subsubsection{Bizonyításhoz hasonlóan, rekurzívan}
+
+\begin{outline}
+	\1 rekurzívan $f$-ből mindig kivonjuk $g*f_n*g_m^{-1}*x^{n-m}$-ot
+	\1 megállunk, ha $\deg f < \deg g$, ekkor $r=f$
+	\1 $q=\sum f_n*g_m^{-1}*x^{n-m}$
+\end{outline}
+
+\subsubsection{Horner táblázat}
+
+\begin{outline}
+	\1 $f = (x-c)*q + r$ ahol $\deg r \le 0$ \;\; (azaz $g=x-c$ és $\deg g = 1$)
+\end{outline}
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		& $f_n$ & $f_{n-1}$ & $f_{n-2}$ & ... & $f_0$ & \\
+		\hline
+		c & $\times$ & $c_1=f_n$ & $c_2=c_1*c+f_{n-1}$ & .. & $c_n=c_{n-1}*c+f_1$ & $c_{n+1}=...=f(c)$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\pagebreak
+
+\section{Gyöktényező kiemelése, következményei}
+
+\subsection{Gyöktényező kiemelése}
+
+\begin{outline}
+	\1 Ha $R$ egy E.I.T. és $f \in R[x]$ és $f(c)=0$
+	\1 Akkor $\exists q \in R[x]: f = q*(x-c)$
+	\1 Bizonyítás:
+		\2 $f$ osztása $x-c$-vel: $f = q*(x-c)+r$
+		\2 $\deg r < \deg x-c = 1 \implies r$ konstans
+		\2 $c$ gyök $\implies 0=f(c)=q*(c-c)+r \implies r=0$
+\end{outline}
+
+\subsection{Gyökök száma max a polinom fokszáma}
+
+\begin{outline}
+	\1 Legyen $R$ egy E.I.T. (!!!) és $f \in R[x]$ és $\deg f = n$
+	\1 Ekkor $f$-nek max $n$ gyöke van
+	\1 Bizonyítás: (indukcióval)
+		\2 $n=0 \implies f(x)=r \implies $ nincs gyök ha $r \ne 0$
+			\3 ha $r = 0$ akkor $f=0$ azaz $\deg f = -\infty$
+		\2 indukciós lépés: $\exists c$ gyök $\implies f=(x-c)*q$
+			\3 $x-c$ az 1 gyök
+			\3 $\deg q = n-1$, indukciós feltevés alapján max $n-1$ gyöke van
+			\3 $1+$ max $n-1=$ max $n$, tehát készen vagyunk
+\end{outline}
+
+\subsection{Polinomok egyenlősége több behelyettesítés alapján}
+
+\begin{outline}
+	\1 Legyen $R$ egy E.I.T. és legyen $R$-nek legalább $n+1$ eleme (pl. végtelen)
+	\1 Ha $\deg f_1 \le n$ és $\deg f_2 \le n$ és $\forall r \in R: f_1(r) = f_2(r)$
+	\1 Akkor $f_1 = f_2$ (azaz az együtthatók és tehát a fokszámok megegyeznek)
+	\1 Bizonyítás: tegyük fel, hogy $f_1 \ne f_2$
+		\2 $f_1 - f_2 \ne 0$ és $\deg f_1 - f_2 \le n$ $\implies$ max $n$ gyöke van (előző tétel)
+		\2 Tehát $(f_1-f_2)(r)$ nem lehet nulla $n+1$ helyen, azaz ellentmondás
+\end{outline}
+
+\pagebreak
+
+\subsection{Lagrange interpoláció}
+
+\begin{outline}
+	\1 Legyen $R$ egy test és $\deg f \le n$
+	\1 Ha $n+1$ helyen ismerem $f(r)$ értékét: $y_i=f(x_i)$ \;\; ($i=1..n+1$)
+	\1 Akkor $f$ egyértelműen megadható polinomok egyenlősége tétel miatt:\\
+	$\exists! f \in R[x]: \forall i \in [1,n+1]: f(x_i) = y_i$
+	\1 Bizonyítás:
+		\2 Legyen $l_i(x) = (\; \prod_{j=0 \wedge i \ne j}^{n} (x-x_j) \;) \;/\;
+		(\; \prod_{j=0 \wedge i \ne j}^{n} (x_i-x_j) \;)$
+		\2 Ekkor $l_i(x)$ akkor $1$ ha $i=j$ egyébként mindig $0$
+		\2 Így ez megoldás: $f(x) = \sum_{i=0}^{n} y_i*l_i(x)$
+\end{outline}
+
+\section{Többváltozós polinomok}
+
+\begin{outline}
+	\1 pl.: $4x^2+3xy+2y+1$
+	\1 $R[x_1,x_2,...,x_n] = R[x_1][x_2]...[x_n]$ 
+\end{outline}
+
+\section{Egység (más fogalom, mint az egységelem)}
+
+\begin{outline}
+	\1 Egy együttható egység, ha $R$ minden elemének osztója.
+		\2 Ekvivalens megfogalmazás: egység, ha létezik multiplikatív inverze
+	\1 Egy polinom egység, ha minden polinomnak az osztója.
+		\2 Test feletti polinomgyűrű: pontosan a nemnulla konstans polinomok.
+	\1 Gyűrűelemet egységgel szorozva annak osztói, többszörösei nem változnak.
+	\1 Egy EIT két elemét asszociáltaknak nevezzük, ha egymás egységszeresei.
+		\2 Ez egy ekvivalencia (reflexív, szimmetrikus, tranzitív) reláció.
+\end{outline}
+
+\pagebreak
+
+\section{Felbonthatatlan (irreducibilis) polinomok}
+
+\begin{outline}
+	\1 $f \in R[x]$ irreducibilis, ha:
+		\2 $f \ne 0$ és $f$ nem egység
+		\2 $f=g*h \implies$ $g$ egység vagy $h$ egység
+	\1 Példa irreducibilis-ra $\mathbb{Q}$-ban: $(x^2+1)=\frac{1}{2}*(2x^2+2)$ \;\; ($\frac{1}{2}$ egység)
+	\1 Példa nem irreducibilis-ra: $(x^2-1)=(x-1)(x+1)$
+	\1 Test felett minden elsőfokú polinom felbonthatatlan.
+\end{outline}
+
+\subsection{Algebra alaptétele $\mathbb{C}$-ben}
+
+\begin{outline}
+	\1 Ha $f \in \mathbb{C}[x]$ és $\deg f \ge 1$ akkor létezik $f$-nek gyöke
+	\1 Nem bizonyítjuk, nagyon nehéz
+	\1 Következmény: $\mathbb{C}$-ben irreducibilis $\Leftrightarrow$ elsőfokú polinom
+\end{outline}
+
+\subsection{Irreducibilis $\mathbb{R}$-ben}
+
+\begin{outline}
+	\1 $\mathbb{R}$-ben azok és csak azok az $f$ polinomok irreducibilisak, amik:
+		\2 $\deg f = 1$
+		\2 $\deg f = 2$ és $f=ax^2+bx+c$ és $b^2-4ac < 0$
+\end{outline}
+
+\subsection{Irreducibilis $\mathbb{Z}_p$-ben, $\mathbb{Q}$-ban, $\mathbb{Z}$-ben}
+
+\begin{outline}
+	\1 Tétel bizonyítás nélkül
+	\1 Minden $n \ge 1$-re létezik $n$-ed fokú irreducibilis polinom
+\end{outline}
+
+\subsection{Felbonthatóság és gyökök kapcsolata test felett}
+
+\begin{outline}
+	\1 van gyöke $\Leftrightarrow$ létezik első fokú faktora (osztója)
+	\1 $\deg f \ge 2$ és van gyöke $\implies$ felbontható
+	\1 $\deg f = 2 \lor \deg f = 3$: felbontható $\Leftrightarrow$ van gyöke
+\end{outline}
+
+\pagebreak
+
+\section{Modulo polinom}
+
+\begin{outline}
+	\1 Létezik ilyen
+	\1 Elvégzem a műveletet, elosztom a modulo-val és a maradékot veszem
+	\1 Ha $f$ irreducibilis, akkor $mod \; f$ egy test
+	\1 $\mathbb{C}$: mintha $mod \; i^2+1$-ben számolnánk
+	\1 Euklideszi algoritmussal megoldható pl. $(3+2x)*g \equiv 1 \mod x^2+1$\\
+	$(3+2x)^{-1} \equiv \frac{4}{13} * (-\frac{1}{2}x + \frac{3}{4}) \mod x^2+1$
+\end{outline}
+
+\subsection{Véges testek}
+
+\begin{outline}
+	\1 Alkalmazás: kódolás, hibajavítás
+	\1 Véges test: egyszerre $mod\;p$ ($p$ prím) és $mod\;f$ ($\deg f = n$)
+	\1 Ekkor $p^n$ elemű (elemszámú) testről beszélünk
+	\1 pl.: $(2x+1)(x+2) \equiv 2x \;\; (mod \; 3, \; mod \; x^2+1)$\\
+		$3^2=9$ elem: $\{0,1,2,x,x+1,x+2,2x,2x+1,2x+2\}$
+\end{outline}
+
+\section{Elem rendje, gyűrű karakterisztikája}
+
+\subsection{Elem additív rendje}
+
+\begin{outline}
+	\1 Legyen $R$ egy gyűrű és $0 \ne r \in R$
+	\1 $r$ rendje a legkisebb olyan $n$ egész, amelyre $n*r=0$
+	\1 pl.: $Z_7$-ben $3$ rendje $7$ mert $7*3=21 \; mod \; 7 = 0$
+	\1 Nullosztómentes gyűrűben az összes nemnulla elem rendje megegyezik.
+\end{outline}
+
+\subsection{Gyűrű karakterisztikája}
+
+\begin{outline}
+	\1 $char(R)$: nullosztómentes $R$ gyűrű karakterisztikája
+		\2 $char(R)=0$ ha $R$ elemeinek közös rendje nem véges
+		\2 egyébként $char(R)=$ $R$ elemeinek közös additív rendje
+	\1 Példa: $char(\mathbb{Z}_p) = p$ ha $p$ prím
+	\1 Példa: $char(\mathbb{Z})=char(\mathbb{Q})=char(\mathbb{R})=char(\mathbb{C})=0$
+\end{outline}
+
+\pagebreak
+
+\section{Algebrai derivált}
+
+\begin{outline}
+	\1 Legyen $f \in R[x]$ ahol $R$ test és $f=a_0+a_1x+a_2x^2+...+a_nx^n$
+	\1 Ekkor az algebrai derivált: $f'=a_1+2a_2x+3a_3x^2+...+n*a_nx^{n-1}$
+		\2 $f'=\sum_{k=0}^{n} k*f_k*x^{k-1}$
+\end{outline}
+
+\section{Gyökök multiplicitása}
+
+\begin{outline}
+	\1 $c$ min. $k$-szoros gyök: $\exists q: f=(x-c)^k*q$
+	\1 $c$ pontosan $k$-szoros gyök: $c$ $k$-szoros gyök, de nem $k+1$-szeres
+\end{outline}
+
+\subsection{Algebrai deriválttal összefüggés}
+
+\begin{outline}
+	\1 $f$-nek a $c$ $k$-szoros gyöke $\implies$ $f'$-nek $c$ min. $(k-1)$-szeres gyöke
+	\1 Bizonyítás:
+		\2 $f=(x-c)^k*q$
+		\2 $f'=((x-c)^k*q)'=$nem biz$=((x-c)^k)'*q+(x-c)^k*q'=$\\
+		$=k*(x-c)^{k-1}*q+(x-c)^k*q'=(x-c)^{k-1}*(k*q+(x-c)*q')$
+	\1 Ez a tétel "min" helyett "pontosan"-nal akkor működik, ha $char(R) \not |\; k$
+		\2 pl. $\mathbb{R}$ esetén, mivel $char(\mathbb{R})=0 \not |\; k$ (minden $k \ne 0$)
+\end{outline}
+
+\subsection{LNKO-val, algebrai deriválttal összefüggés}
+
+\begin{outline}
+	\1 $LNKO(f,f')=d=1 \implies$ $f$-nek nincs többszörös gyöke
+	\1 $char(R)=0 \implies$ $d$ gyökei $f$ legalább kétszeres gyökei
+\end{outline}
+
+\subsection{Számolása Horner táblázattal}
+
+\begin{outline}
+	\1 Egy Horner táblázatot újrahasználhatunk
+		\2 Mindig kevesebb oszlop kell, ezért mindig eggyel több $\times$-ot rakunk
+		\2 Minden (pl. a maradék) azonos oszlopban van
+	\1 Az előző eredmény mindig az új osztandó polinom
+	\1 Addig írunk új sort, amíg a maradék $0$
+\end{outline}
+
+\pagebreak
+
+\section{Euklideszi algoritmus polinomokkal}
+
+\begin{outline}
+	\1 Legyen $R$ egy test és $f,g \in R[x]$
+	\1 Ha $d=LNKO(f,g)$ akkor
+		\2 $d|f$ és $d|g$ \;\; ($d$ közös osztó)
+		\2 $\forall h: (h|f) \wedge (h|g) \implies h|d$ \;\; ($d$ a legnagyobb)
+	\1 A legnagyobb közös osztó egészek körében sem volt egyértelmű ($x$, $-x$)
+	és polinomok esetén sem az.
+	\1 Bővített euklideszi algoritmus is jó: $LNKO(f,g)=d=f*u+g*v$
+\end{outline}
+
+\subsection{Euklideszi algoritmus a gyakorlatban}
+
+\begin{outline}
+	\1 Egységgel be szabad szorozni, az nem változtat az eredményen.
+	\1 Egymást követő osztások:
+		\2 $f,g,r_1,r_2,...$ kettesével osztása megadja a következőt
+		\2 1.: $f/g \implies f=g*q_1+r_1$
+		\2 2.: $g/r_1 \implies g=r_1*q_2+r_2$
+		\2 3.: $r_1/r_2 \implies r_1=r_2*q_3+r_3$
+	\1 Addig osztunk, amíg a maradék 0 nem lesz.\\
+	Ekkor az utolsó $\ne 0$ maradék a megoldás (LNKO).
+		\2 pl.: $r_2 \ne 0 \wedge r_3 = 0 \implies LNKO(f,g)=d=r_2$
+	\1 Bővített euklideszi algoritmus: pontosan úgy, mint skalárokkal
+\end{outline}
+
+\subsection{Kétváltozós diofantikus egyenletek}
+
+\begin{outline}
+	\1 Legyen $f*u+g*v=h$
+	\1 Bővített euklideszivel ki kell számolni: $f*u'+g*v'=d=gcd(f,g)$
+		\2 Itt is pontosan akkor oldható meg, ha $d|h$
+	\1 Megoldások, ahol $w \in R[x]$ egy tetszőleges polinom:
+		\2 $u_w = u_0+\frac{g}{d}w$ ahol $u_0=u'*\frac{h}{d}$
+		\2 $v_w = v_0-\frac{f}{d}w$ ahol $v_0=v'*\frac{h}{d}$
+\end{outline}
+
+\pagebreak
+
+\section{Hibakorlátozó kódolás}
+
+\subsection{Alapfogalmak}
+
+\begin{outline}
+	\1 $\Sigma$ az ábécé, azaz egy rögzített véges halmaz
+		\2 $n$ hosszú szavak halmaza: $\Sigma^n$
+	\1 Hamming-távolság $2$ $n$ hosszú szó között: pozíciók száma, ahol különböznek
+		\2 Szóhalmaz távolsága: min\{ bármely $2$ szavának távolsága \}
+	\1 Kód: $\Sigma^n$ részhalmaza (azaz bizonyos $n$ hosszú szavak)
+		\2 Kódszó: kód egy eleme
+	\1 Szándék: küldeni kívánt szó (ezt alakítjuk kódszóvá)
+	\1 Dekódolás: üzenethez legközelebbi kódszó kiválasztása
+\end{outline}
+
+\subsection{t-hibajelző, t-hibajavító kód}
+
+\begin{outline}
+	\1 t-hibajelző kód: max t helyen sérült üzenetnél észreveszi, hogy sérült
+		\2 $d$ távolságú kód $\implies$ $d-1$ hibát jelez
+		\2 Bizonyítás: távolság $d$ $\implies$ $d-1$ változás nem adhat új kódszót
+	\1 t-hibajavító kód: max t helyen sérül üzenetnek tudja az eredeti kódszavát
+		\2 $d$ távolságú kód $\implies$ $\lfloor \frac{d-1}{2} \rfloor$ hibát javít
+		\2 Bizonyítás:
+			\3 Legyen $w$ az eredeti kódszó, $w'$ a sérült, $w_2$ egy másik kódszó
+			\3 Kiindulás: $distance(w,w') \le \lfloor \frac{d-1}{2} \rfloor$
+			\3 Legyen $distance(w',w_2)=x$
+			\3 Be kell látni: $\lfloor \frac{d-1}{2} \rfloor < x$
+			\3 $distance(w,w_2) \ge d \implies x + \lfloor \frac{d-1}{2} \rfloor \ge d$
+			\3 Átrendezve: $x \ge \lfloor \frac{d+1}{2} \rfloor > \lfloor \frac{d-1}{2} \rfloor$
+	\1 Példa béna, pazarló kódra: n-szeres ismétlés $\implies$ kód távolsága n
+\end{outline}
+
+\pagebreak
+
+\subsection{Singleton-korlát}
+
+\subsubsection{Tétel}
+
+\begin{outline}
+	\1 Legyen
+		\2 $Q=|\Sigma|$ az abécé mérete
+		\2 $c$ a kódszavak száma
+		\2 $n$ a kódszavak hossza
+		\2 $d$ a kód távolsága
+	\1 Állítás: $c \le Q^{n-d+1} = Q^{n-(d-1)}$
+	\1 Bizonyítás
+		\2 A kód távolsága $d$ $\implies$ $d-1$ változtatás nem adhat új kódszót
+		\2 Változtassuk az összes kódban az utolsó $d-1$ betűt ugyan arra
+		\2 Így is páronként különböznek, szóval el is hagyható a $d-1$ betű
+		\2 Szóval max annyi kódszó van, hogy a kódszavakat $d-1$ betűvel rövidítve is páronként különbözik mindegyik
+\end{outline}
+
+\subsubsection{Következmény}
+
+\begin{outline}
+	\1 Hibajavító betűk száma $\ge d-1$
+		\2 Azaz legalább ennyivel kell a szándéknál több betűt használni
+	\1 MDS-kód: egyenlőség áll fenn a Singleton-korlát tételében
+\end{outline}
+
+\subsubsection{Reed-Solomon kód}
+
+\begin{outline}
+	\1 Egy MDS-kód
+	\1 Működés
+		\2 $\Sigma=\{f\in R\}$ ahol $R$ egy véges test
+		\2 Szándék: $f$ polinom együtthatói
+		\2 Kód: $f*g$
+		\2 $g$ kódpolinom $d-1$ fokú
+	\1 Tétel: $g$ gyökei páronként különböznek $\implies$ $d$ távolságú a kód
+\end{outline}
+
+\pagebreak
+
+\subsection{Hamming-korlát}
+
+\subsubsection{Tétel}
+
+\begin{outline}
+	\1 Legyen
+		\2 $Q=|\Sigma|$ az abécé mérete
+		\2 $c$ a kódszavak száma
+		\2 $n$ a kódszavak hossza
+		\2 $t$ hibát javít a kód ($\implies 2t+1$ vagy $2t+2$ távolságú)
+	\1 Állítás: $c * \sum_{k=0}^{t}(\binom{n}{k} * (Q-1)^k) \le Q^n$
+		\2 Szummán belül: kódszótól pontosan $k$ távolságra hány kódszó van
+		\2 Válasz: $\binom{n}{k}=$"hol változtatok" $*$ "mire változtatok"$=(Q-1)^k$
+		\2 Szóval a szumma: kódszótól $\le t$ távolságra lévő szavak száma
+		\2 $Q^n$ pedig az ábécéből kirakható $n$ hosszú szavak száma.
+	\1 Bizonyítás
+		\2 A szumma eredményében "megszámolt" szavak diszjunktak különböző "kiindulási" kódszó esetén, hiszen $t$ hibát javít a kód.
+		\2 Így a (diszjunkt halmazok száma) $*$ (diszjunkt halmaz mérete) nem lehet nagyobb, mint a lehetséges szavak száma.
+\end{outline}
+
+\subsubsection{Következmény}
+
+\begin{outline}
+	\1 Perfekt kód: egyenlőség áll fenn a Hamming-korlát tételében
+\end{outline}
+
+\pagebreak
+
+\section{ZH 2 összefoglaló}
+
+\subsection{Gyűrű, integritási tartomány, test}
+
+\begin{outline}
+	\1 Gyűrű: $*$ disztributív $+$-ra, $+$ asszoc. és kommutatív, $*$ asszoc. és $\exists 0$
+	\1 Integritási tartomány: gyűrű, $*$ kommutatív, nullosztómentes (pl. $\mathbb{Z}_{prim}$)
+	\1 E.I.T.: integritási tartomány, $\exists 1$
+	\1 Test: E.I.T. ahol van osztás ($\forall a \ne 0: \exists a^{-1}$) (pl. $\mathbb{Q}, \mathbb{Z}_{prim}$)
+	\1 Gyűrű elem (additív) rendje: legkisebb $n$ egész, hogy $n*$ az elem  $=0$
+	\1 $char(R)$: I.T. elemeinek (megegyező) rendje (pl. $char(\mathbb{Z}_{prim})=prim$)
+		\2 $char(R)=0$ ha az elemek rendje nem véges, pl. $char(\mathbb{Z})$, $char(\mathbb{Q})$
+\end{outline}
+
+\subsection{Polinom alapok}
+
+\begin{outline}
+	\1 $f = f_0 + ... + f_{\deg f}*x^{\deg f}$ ahol $\deg f=$ legnagyobb $n$ ahol $f_n \ne 0$
+		\2 $f = 0 \implies \deg f = -\infty$
+	\1 $\deg f+g \le max(\deg f, \deg g)$
+	\1 $\deg f*g \le \deg f + \deg g$ (egyenlő, ha $R$ egy I.T, azaz nullosztómentes)
+	\1 Maradékos osztás: $f=g*q+r \wedge \deg r < \deg q$: ($R$ egy E.I.T, $\exists {g_{\deg g}}^{-1}$)
+		\2 Bizonyítások: egyértelműség: fokszámmal; létezés: rekurzióval
+		\2 Gyakorlatban: rekurzióval, $f^*=f-g*f_{\deg f}*g_{\deg g}^{-1}*x^{\deg f - \deg g}$
+			\3 Alapeset, megállás: $\deg f < \deg g$ (ekkor $r=f$)
+			\3 $q=\sum f_{\deg f}*g_{\deg g}^{-1}*x^{\deg f - \deg g}$ (ahol $f$ persze változik)
+	\1 Gyökök: $c$ gyök ha $f(c)=0$, ekkor $f=q*(x-c)$
+		\2 Ha $R$ egy E.I.T. akkor $f$-nek legfeljebb $\deg f$ darab gyöke van
+	\1 Egység: mindennek az osztója (polinom egység, ha $\forall$ polinomnak osztója)
+		\2 $R$ egy test: pontosan nemnulla konstans polinomok az egységek
+		\2 Gyűrűelem egységgel szorzása: osztói, többszörösei nem változnak.
+		\2 Egy gyűrű elemei asszociáltak, ha egymás egységszeresei
+	\1 Algebrai derivált: $f'=\sum_{k=0}^{\deg f} k * f_k * x^{k-1}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Horner-elrendezés (Horner táblázat)}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		& $f_n$ & $f_{n-1}$ & $f_{n-2}$ & ... & $f_0$ & \\
+		\hline
+		c & $\times$ & $c_1=f_n$ & $c_2=c_1*c+f_{n-1}$ & .. & $c_n=c_{n-1}*c+f_1$ & $c_{n+1}=...=f(c)$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Felbonthatatlan (irreducibilis) polinomok}
+
+\begin{outline}
+	\1 $f \ne 0$ irreducibilis ha nem egység és $f=g*h \implies$ $g$ vagy $h$ egység
+	\1 Test felett: $\deg f = 1 \implies f$ irreducibilis
+	\1 $\mathbb{C}$-ben: irreducibilis $\Leftrightarrow$ elsőfokú polinom (algebra alaptétele $\mathbb{C}$-ben)
+	\1 $\mathbb{Z}_{prim}$, $\mathbb{Q}$, $\mathbb{Z}$: minden $n \ge 1$-re létezik $n$-ed fokú irreducibilis polinom
+\end{outline}
+
+\subsection{Gyökök multiplicitása}
+
+\begin{outline}
+	\1 $c$ legalább $k$-szoros gyök $\implies \exists q: f=(x-c)^k*q$
+	\1 $f$-nek a $c$ $k$-szoros gyöke $\implies$ $f'$-nek $c$ min. $(k-1)$-szeres gyöke
+		\2 Bizonyítás: $f=(x-c)^k*q$ deriválása (szorzat deriváltja azonosság)
+		\2 "min" helyett "pontosan" ha $char(R) \not | \; k$ (mert pl. $char(\mathbb{R})=0$)
+	\1 $char(R)=0 \implies LNKO(f,f')$ gyökei az $f$ legalább kétszeres gyökei
+\end{outline}
+
+\subsection{(Bővített) euklideszi algoritmus}
+
+\begin{outline}
+	\1 Test felett működik; nem egyértelmű: egységgel részeredményeket megszorozhatjuk
+	\1 Gyakorlatban: $f,g,r_1,r_2,...$ kettesével osztása megadja a következőt
+	\1 Ugyan úgy megy, mint skalárokkal; utolsó nemnulla az eredmény
+\end{outline}
+
+\subsection{Kétváltozós diofantikus egyenletek}
+
+\begin{outline}
+	\1 $u,v=?$ \;\; és \;\; $f*u+g*v=h$ \;\; és \;\; $f*u'+g*v'=d=gcd(f,g)$
+	\1 Megoldható $\Leftrightarrow d|h$
+	\1 Megoldások, ahol $w \in R[x]$ tetszőleges:
+		\2 $u_w = u_0+\frac{g}{d}w$ ahol $u_0=u'*\frac{h}{d}$
+		\2 $v_w = v_0-\frac{f}{d}w$ ahol $v_0=v'*\frac{h}{d}$
+\end{outline}
+
+\end{document}

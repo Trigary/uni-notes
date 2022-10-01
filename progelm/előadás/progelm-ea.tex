@@ -1,0 +1,740 @@
+% !TeX spellcheck = hu_HU
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[magyar]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\usepackage{struktex}
+\usepackage{outlines}
+\usepackage{hyperref}
+
+\hyphenpenalty=10000
+
+\begin{document}
+
+\begin{center}
+	\huge
+	Programozáselmélet\\
+	\vspace{1mm}
+	\LARGE
+	Előadás jegyzet\\
+	\vspace{5mm}
+	\large
+	Készült Borsi Zsolt előadásai\\
+	és Gregorics Tibor gyakorlatai alapján\\
+	\vspace{5mm}
+	Sárközi Gergő, 2021-22-1. félév\\
+	Nincsen lektorálva!
+\end{center}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Bevezetés}
+
+\paragraph{Intervallum} $ [a..b] ::= \{ x \in \mathbb{Z} | a \le x \wedge x \le b \}$ \\
+Üres, ha $a > b$.
+
+\paragraph{Reláció, rendezett pár} $ A \times B ::= \{ (a,b) | a \in A \wedge b \in B \} $ \\
+Az $A \times B$ halmaz minden részhalmazát, az üres halmazt is, relációnak nevezzük. \\
+$ | A \times B | = |A| * |B| $ \\
+A rendezett pár felfogható relációként is: $A$-ról $B$-re képezés. \\
+Jelölése: $R \subseteq A \times B$ \\
+Legyen $A={1,2,3}$, $B={a,b,c,d}$ és $R={(1,a), (1,b), (2,c)}$. \\
+Ekkor $R \subseteq A \times B$, valamint $D_R = \{1,2\}$, és $R(1)=\{a,b\}$. \\
+$R(x) = \emptyset \Leftrightarrow |R(x)|=0 \Leftrightarrow x \notin D_R $ \\
+$D_R ::= \{ a \in A | \exists b \in B: (a,b) \in R \}$ \\
+$R_R ::= \{ b \in B | \exists a \in A: (a,b) \in R \}$ \\
+$R(a) ::= \{ b \in B | (a,b) \in R \} $ \\
+Reláció inverze: \\
+$R^{-1} = \{(b,a) \in B \times A | (a,b) \in R\}$
+
+\paragraph{Függvény, determinisztikus reláció} -\\
+Legyen $A$ és $B$ nemüres halmaz.
+$R \subseteq A \times B$ függvény, ha $\forall a \in A: |R(a)| \le 1$. \\
+Függvény jelölése: $R \in A \to B$ (ekkor $|R(a)| \le 1$) \\
+vagy $R: A \to B$ (ekkor $|R(a)| = 1$, azaz $D_R=A$) \\
+$R: A \to B$ esetén sokszor $R(a)=\{b\}$ helyett csak $R(a)=b$-t használunk
+
+\paragraph{Kompozíció} $P \subseteq A \times B$ és $Q \subseteq B \times C$\\
+Normál: \\
+$Q \circ P=\{(a,c) \in A \times C \;|\; \exists b \in B: (a,b) \in P \wedge (b,c) \in Q\}$\\
+Szigorú: ($\exists (a,b) \in P: \exists c \in C: (b,c) \not \in Q \implies (Q \odot P)(a) = \emptyset$)\\
+$Q \odot P=\{(a,c) \in A \times C \;|\; \exists b \in B: (a,b) \in P \wedge (b,c) \in Q \wedge P(a) \subseteq D_Q\}$
+
+\paragraph{Sorozatok} $H^{**} = H^* \cup H^\infty $ \\
+$H = \{1,2,3\}$ \\
+$<1,5,3> \notin H^*$, mert $5 \notin H$ \\
+$<1,1,3> \in H^*$ \\
+$<1,1,1,1,...> \notin H^*$, viszont $\in H^\infty$ \\
+
+\paragraph{Egyéb} -\\
+hamis mindent implikál: (HAMIS $\implies$ bármi) = IGAZ
+
+\pagebreak
+
+\section{Alapfogalmak}
+
+\subsection{Állapottér}
+
+\begin{outline}
+	\1 Állapot: változókkal címkézett értékek halmaza
+		\2 példa: $a=\{ v_1:a_1, v_2:a_2 \}$
+		\2 változó használata: $n(\{n:6\})=6$ (valójában $\{6\}$, de elnézzük)
+	\1 Érték: típusérték-halmaz egy eleme
+	\1 Állapottér: összes lehetséges állapot halmaza
+		\2 jelölés: $A=( v_1:A_1, v_2:A_2 )$
+	\1 Az $A$ állapottérnek altere a $B$ állapottér ($B<A$),
+	ha a $B$ állapottér típusértékei (számmosságot is figyelmbe véve) benne vannak $A$-ban is.
+		\2 példa: $A=(x:\mathbb{N},y:\mathbb{N},z:\mathbb{N})$
+		és $B=(y:\mathbb{N},x:\mathbb{N})$ akkor $B<A$.
+		\2 A típusérték-halmazoknak meg kell egyezniük: az nem "elég",
+		ha az egyik a másiknak csak a  részhalmaza. \\
+		Itt egyik sem részhalmaza a másiknak: $A=(x:\mathbb{N)}$, $B=(x:\mathbb{Z})$
+		\2 TODO lehet különböző a változó neve?
+\end{outline}
+
+\subsection{Feladat}
+
+\begin{outline}
+	\1 Feladat: reláció, amely egy állapottérről ugyan arra az állapottérre képez
+		\2 Ha $A$ állapottér, akkor $F \subseteq A \times A$ egy feladat.
+		\2 Tehát $F=\{\}$ is egy feladat.
+\end{outline}
+
+\subsubsection{Példa}
+
+Adjuk meg egy pozitív egész szám egy pozitív osztóját. \\
+$A=( n:\mathbb{N}^+, d:\mathbb{N}^+ )$ \\
+$D_F = A$ \\
+$F \subseteq A \times A$ \\
+$F(\{n:6,d:11\}) = \{ \{n:6,d:2\}, \{n:6,d:3\}, ... \} $ \\
+Itt a kimenetnél nézőpont kérdése, hogy n=6 feltétel-e, vagy meg lehetne változtatni. \\
+$F(x,y)=\{(u,v) ; u=x \wedge v|x\}$ \\
+$F(x,*)=\{(*,v) ; v|x\}$ \\
+$F = \{(u,v) \in A \times A \;|\; d(v)|n(u) \}$
+
+\pagebreak
+
+\subsection{Program}
+
+\begin{outline}
+	\1 Leképezés, amely megadja bármelyik kiinduló állapotra az abból induló végrehajtási sorozatokat.
+	\1 Program: $S \subseteq A \times (\overline{A} \cup \{fail\})^{**}$ ahol:
+		\2 $\overline{A} = \underset{A \le B}{\bigcup} B $
+		\2 $D_S=A$ (minden bemenetet lekezel)
+		\2 $\forall a \in A: \forall vs \in S(a): |vs| \ge 1 \wedge vs_1 = a$
+		(végrehajtási sorozat nem üres és első tagja a bemenet)
+		\2 $\forall vs \in R_S: (\forall i \in \mathbb{N}^+: i < |vs| \to vs_i \neq fail)$
+		(csak az utolsó állapot lehet fail)
+		\2 $\forall vs \in R_S: |vs|<\infty \to vs_{|vs|} \in A \cup \{fail\}$
+		(az utolsó állapot, ha van ilyen, csak alap-állapottérbeli vagy fail lehet)
+\end{outline}
+
+\subsubsection{Alap-állapottér}
+
+\begin{outline}
+	\1 nincsenek benne a segédváltozók
+	\1 kiindulási állapot mindig alap-állapottérbeli
+	\1 végállapot alap-állapottérbeli, vagy fail
+\end{outline}
+
+\subsubsection{Végrehajtási sorozat}
+
+\begin{outline}
+	\1 első tagja mindig a bemeneti állapot
+	\1 ha van benne fail, akkor csak leghátul lehet
+	\1 segédváltozók a végrehajtási sorozat első és utolsó tagjában nincsenek, viszont a többiben igen
+	\1 legalább 1, max. végtelen hosszú
+	\1 egy kezdő állapotból több különböző végrehajtási sorozat indulhat
+	\1 értékadás, ami nem változtat semmit is generál új végrehajtási sorozatot
+\end{outline}
+
+\subsubsection{Példa}
+
+$A=(x:\{1,2,3\})$ \\
+S program (azaz halmaz) elemei: (mindegyik felírás helyes)\\
+$\{x:1\} \to <\{x:1\}, \{x:3\}>$ \\
+$1 \to <1,1,1>$ \\
+$(2) \to <(2), (3), (4)>$ \\
+$(3, <3, fail>)$
+
+\subsection{Programfüggvény}
+
+\begin{outline}
+	\1 megadja egy program lehetséges végállapotait (amik sem fail, sem végtelenek nem lehetnek) egy adott kezdőállapot esetén
+	\1 Programfüggvény: egy reláció, pl. $p(S) \subseteq A \times A$
+		\2 ez a $S \subseteq A \times (\overline{A} \cup \{fail\})^{**}$ programhoz van
+		\2 $D_{p(S)} = \{ a \in A | S(a) \subseteq \overline{A}^* \}$
+		(ott értelmes, ahol S csak véges, csak nem fail végrehajtási sorozatot ad)
+		\2 $\forall a \in D_{p(S)}: p(S)(a) = \{b \in A | \exists vs \in S(a): b=vs_{|vs|}\}$
+		(azaz $p(S)(x)$ = 'S program lehetséges végállapotjai (halmaza) $x$ kezdőállapot esetén')
+		\2 ha $x \notin D_{p(S)}$, akkor $p(S)(x) = \emptyset$
+\end{outline}
+
+\subsection{Megoldás}
+
+\begin{outline}
+	\1 S program megoldja az F feladatot (S program teljesen helyes F feladatra nézve) ha:
+		\2 $D_F \subseteq D_{p(S)}$ (feladat minden kezdőállapotát le tudja kezelni)
+		\2 $\forall a \in D_F : p(S)(a) \subseteq F(a)$
+		(program végállapotja, bármilyen feladatban értelmezett kezdőállapot esetén,
+		részhalmaza a feladat "megoldáshalmazának")
+\end{outline}
+
+\pagebreak
+
+\subsection{Parciális helyesség}
+
+\begin{outline}
+	\1 Nem hasznos, nem nagyon fogjuk használni.
+	\1 Gyenge programfüggvény:
+		\2 $\widetilde{p}(S) \subseteq A \times (A \cup \{fail\})$ reláció
+		\2 $S \subseteq A \times (\overline{A} \cup \{fail\})^{**}$ programhoz való
+		\2 $D_{\widetilde{p}(S)} = \{ a \in A | S(a) \cap (\overline{A} \cup \{fail\})^* \ne \emptyset \}$
+		(ott értelmes, ahol S ad véges végállapotot is)
+			\3 fail-t megenged, de végtelent nem
+			\3 értelmezve van, ha azonos bemenethez van végtelen és véges megoldás is
+		\2 $\forall a \in D_{\widetilde{p}(S)}: \widetilde{p}(S)(a) =$\\
+		$\{b \in A \cup \{fail\} | \exists vs \in S(a) \cap (\overline{A} \cup \{fail\})^*: b=vs_{|vs|}\}$ \\
+		(azaz $\widetilde{p}(S)(x)$ = 'S program lehetséges végállapotjai (halmaza) $x$ kezdőállapot esetén, csak véges vs-eket nézve')
+	\1 Parciális helyesség ($S$ program parciálisan helyes az $F$ feladatra nézve):
+		\2 ha $\forall a \in D_F: \widetilde{p}(S)(a) \subseteq F(a)$
+		\2 szóval végtelen vs-ek kivételével: mint a rendes megoldás
+\end{outline}
+
+\subsection{Elemi programok}
+
+\begin{outline}
+	\1 Elemi program definíció: $\forall a \in A: S(a) \subseteq$ \\
+	$\{ <a>, <a,fail>, <a,a,a,...>, <a,b> | b \in A \}$
+	\1 Nevezetes elemi programok:
+		\2 $\forall a \in A: ABORT(a) = \{<a, fail>\}$
+		\2 $\forall a \in A: SKIP(a) = \{<a>\}$
+		\2 értékadás (x := 1)
+		\2 szimultán értékadás (x,y := y,x)
+		\2 értékkiválasztás (x :$\in$ \{n-1, n-2\})
+\end{outline}
+
+\pagebreak
+
+\subsection{Programok, programfüggvények, stb. relációi}
+
+\subsubsection{$S_1 \subseteq S_2 \implies D_{p(S_2)} \subseteq D_{p(S_1)}$}
+
+Bizonyítás: \\
+$a \in D_{p(S_i)} \Leftrightarrow S_i(a) \subseteq \overline{A}^*$ (def) \\
+$S_1 \subseteq S_2 \implies S_1(a) \subseteq S_2(a)$ \\
+$(S_2(a) \subseteq \overline{A}^*) \wedge (S_1(a) \subseteq S_2(a))
+\implies (S_1(a) \subseteq (S_2(a) \subseteq \overline{A}^*)$
+
+\subsubsection{$S_1 \subseteq S_2 \implies \forall a \in D_{p(S_2)}: p(S_1)(a) \subseteq p(S_2)(a)$}
+
+Bizonyítás: \\
+$x \in p(S_i)(a) \Leftrightarrow \exists vs \in S_i(a): vs_{|vs|}=x$ (def) \\
+$S_1 \subseteq S_2 \implies S_1(a) \subseteq S_2(a)$ \\
+$(\exists vs \in S_1(a): vs_{|vs|}=x) \wedge (S_1(a) \subseteq S_2(a))
+\implies (\exists vs \in S_2(a): vs_{|vs|}=x)$
+
+\subsubsection{$S' \subseteq S$ és S megoldja F-et, akkor S' is}
+
+Lásd előző kettő bizonyítás: \\
+$D_F \subseteq D_{p(S)} \subseteq D_{p(S')}$ \\
+$p(S')(a) \subseteq p(S)(a) \subseteq F(a)$
+
+\subsubsection{$F \subseteq F'$ és S megoldja F'-t, attól még S nem oldja meg F-t}
+
+Példa: F' nem determinisztikus, F kevesebb megoldást fogad el.
+
+\subsubsection{Determinisztikusság relációk}
+
+F, S és p(S) determinisztikussága nagyrészt (vagy egyáltalán?) nem következtethető ki egymásból.
+
+\subsubsection{Szigorúbb feladat}
+
+\begin{outline}
+	\1 $F_2 \subseteq A \times A$ feladat szigorúbb, mint $F_1 \subseteq A \times A$, ha:
+		\2 $D_{F_1} \subseteq D_{F_2}$ \;\;(több helyen értelmezett)
+		\2 $\forall a \in D_{F_1}: F_2(a) \subseteq F_1(a)$ \;\;(kevesebb jó kimenet)
+		\2 Tehát egy feladat önmagának is a szigorítása
+	\1 Állítás: ha $S$ program megoldja $F_2$-t, akkor $F_1$-et is
+	\1 Bizonyítás: $D_{F_1} \subseteq D_{F_2} \subseteq D_{p(S)}$\\
+	és $\forall a \in D_{F_1}: p(S)(a) \subseteq F_2(a) \subseteq F_1(a)$
+\end{outline}
+
+\pagebreak
+
+\section{Logikai függvények}
+
+\begin{outline}
+	\1 Legyen $R \in A \to \mathbb{L}$,
+	ekkor $\lceil R \rceil = \{ a \in A | R(a) = {igaz} \}$
+	\1 Igazsághalmaz: $\lceil R \rceil$
+	\1 $D_R$ nem feltétlenül $A$ ($\in$ jelölés miatt), tehát attól még, hogy nem igaz valahol, nem feltétlenül hamis ott. Éppen ezért egy ilyen logikai függvényt nem lehet megadni csak az igazságtáblájával.
+		\2 Viszont megegyezés miatt igazságtáblával megadott logikai függvény mindenhol értelmezve van.
+	\1 $R : A \to \mathbb{L}$ viszont már a teljes $A$-n értelmezve van
+	\1 Nevezetes logika függvények:
+		\2 $\forall a \in A: IGAZ(a) = \{igaz\}$ \\
+		$\lceil IGAZ \rceil = A$
+		\2 $\forall a \in A: HAMIS(a) = \{hamis\}$ \\
+		$\lceil HAMIS \rceil = \emptyset$
+	\1 Példa: $A=(x:\mathbb{N})$, $R=(1<x<3)$
+\end{outline}
+
+\subsection{Műveletek logika függvényekkel}
+
+\begin{outline}
+	\1 Legyen $A$ felett $Q,R$ logikai függvények
+	\1 $Q \wedge R = \{ a \in A | Q(a) \wedge R(a) \}$
+	\1 $Q \lor R = \{ a \in A | Q(a) \lor R(a) \}$
+\end{outline}
+
+\subsection{Következik reláció, maga után vonás}
+
+\begin{outline}
+	\1 $Q,R \in A \to \mathbb{L}$ és $A \ne \emptyset$
+	\1 $(Q \implies R) \Leftrightarrow (\lceil Q \rceil \subseteq \lceil R \rceil)$
+		\2 ha Q(x) igaz, akkor R(x) is
+	\1 Vegyünk tetszőleges $P \in A \to \mathbb{L}$ függvényt
+		\2 $P \implies IGAZ$
+		\2 $HAMIS \implies P$
+\end{outline}
+
+\pagebreak
+
+\section{Leggyengébb előfeltétel}
+
+\begin{outline}
+	\1 Logikai függvény, amely pontosan ott igaz, ahonnan kiindulva $S$ hibátlanul terminál
+	és az összes lehetséges végállapotban $R$ igaz.
+	\1 Legyen $S \subseteq A \times (\overline{A} \cup \{fail\})^{**}$ program
+	és $R \in A \to \mathbb{L}$ logika függvény
+	\1 $lf(S,R) : A \to \mathbb{L}$
+		\2 tehát minden A-beli ponthoz (pontosan egy) logikai értéket rendel
+	\1 $\lceil lf(S,R) \rceil = \{ a \in A | a \in D_{p(S)}
+	\wedge p(S)(a) \subseteq \lceil R \rceil \}$
+	\1 Leggyengébb, mert $P \implies lf(S,R)$ esetén $P$ szigorúbb, mint $lf(S,R)$
+\end{outline}
+
+\subsection{lf tulajdonságai}
+
+\begin{outline}
+	\1 Legyen $A$ felett $S$ egy program és $Q,R$ logikai függvények
+	\1 Általános tulajdonságok:
+		\2 $lf(S,HAMIS) = HAMIS$
+		\2 ha $Q \implies R$, akkor $lf(S,Q) \implies lf(S,R)$
+		\2 $lf(S,Q) \wedge lf(S,R) = lf(S,Q \wedge R)$
+		\2 $lf(S,Q) \lor lf(S,R) \implies lf(S,Q \lor R)$
+		\2 $\lceil lf(S,IGAZ) \rceil = D_{p(S)}$
+	\1 Elemi függvényekkel:
+		\2 $\lceil lf(ABORT,R) \rceil = \emptyset$
+		\2 $lf(ABORT,R) = HAMIS$
+		\2 $\lceil lf(SKIP,R) \rceil = \lceil R \rceil$
+		\2 $lf(SKIP,R) = R$
+\end{outline}
+
+\subsection{lf kiszámolása}
+
+\begin{outline}
+	\1 $\lceil lf(S,R) \rceil = \{a \in A \;|\; a \in D_{p(S)}$ és behelyettesítjük R-be S-t $\}$
+	\1 pl.: $\lceil lf((x:=x+1),(x<10)) \rceil=\{a \in A \;|\; igaz \wedge (x<10)^{\leftarrow x:=x+1}\}=\{a \in A \;|\; x'=x(a)+1 \wedge x' < 10\}=\{a \in A \;|\; x(a)+1 < 10\} = (x<9)$
+\end{outline}
+
+\pagebreak
+
+\section{Paramétertér, specifikáció tétele}
+
+\subsection{Paramétertér}
+
+\begin{outline}
+	\1 $B$ az $F \subseteq A \times A$ feladat paramétertere, ha
+		\2 létezik $F_1 \subseteq A \times B$ és $F_2 \subseteq B \times A$
+		\2 hogy $F = F_2 \circ F_1$
+	\1 Minden feladatnak létezik paramétertere:\\
+	legyen $B=A$, $F_1 = id$ és $F_2 = F$
+	\1 Minden feladatnak végtelen sok paramétertere van
+	\1 paraméter: paramétertér egy eleme
+\end{outline}
+
+\subsection{Specifikáció tétele}
+
+\begin{outline}
+	\1 Legyen:
+		\2 $S \subseteq A \times (\overline{A} \cup \{fail\})^{**}$ egy program
+		\2 $F \subseteq A \times A$ egy feladat
+		\2 $B$ az $F$ egy paramétertere
+			\3 $F_1 \subseteq A \times B$ és $F_2 \subseteq B \times A$
+			\3 $F = F_2 \circ F_1$
+	\1 Definiáljunk kettő $A \to \mathbb{L}$ logikai fv-t minden paraméterhez ($\forall b \in B$)
+		\2 $\lceil Q_b \rceil = F_1^{-1}(b)$ (olyan $a$-k, amikhez $F_1$ rendel egy $b$-t)
+		\2 $\lceil R_b \rceil = F_2(b)$ (olyan $a$-k, amiket $F_2$ rendel egy $b$-hez)
+	\1 Ekkor: $(\forall b \in B: Q_b \implies lf(S,R_b)) \implies$ ($S$ megoldja $F$-et)
+	\1 Szóval ez egy elégséges, de nem szükséges feltétel
+	\1 Előfeltétel gyengítésével és/vagy utófeltétel szigorításával egy \textit{szigorúbb feladat}ot kapunk.
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Bizonyítás: $(\forall b \in B: Q_b \implies lf(S,R_b)) \implies$ ($S$ mo. $F$-et)}
+
+\begin{outline}
+	\1 $D_F \subseteq D_{p(S)}$
+		\2 $a \in D_F \implies \exists b \in B: (a,b) \in F_1 \implies a \in \lceil Q_b \rceil$
+		\2 $\lceil lf(S,R_b) \rceil = \{a \in D_{p(S)} | p(S)(a) \subseteq \lceil R_b \rceil\} \subseteq D_{p(S)}$
+		\2 $(Q_b \implies lf(S,R_b)) \implies \lceil Q_b \rceil \subseteq \lceil lf(S,R_b) \rceil \subseteq D_{p(S)}$
+		\2 beláttuk, hogy $a \in D_F \implies a \in \lceil Q_b \rceil \subseteq D_{p(S)}$
+	\1 $\forall a \in D_F: p(S)(a) \subseteq F(a)$
+		\2 $\lceil lf(S,R_b) \rceil = \{a \in D_{p(S)} | p(S)(a) \subseteq \lceil R_b \rceil\}$
+			\3 tehát $p(S)(a) \subseteq \lceil R_b \rceil$
+		\2 $F_2(b) \subseteq F(a)$
+		\2 beláttuk, hogy $p(S)(a) \subseteq \lceil R_b \rceil = F_2(b) \subseteq F(a)$
+\end{outline}
+
+\subsection{Feladat specifikációja}
+
+$F(n,*) = \{(n,d) \;|\; d|n\}$\\
+$A=(n:\mathbb{N}^+, d:\mathbb{N}^+)$ (állapottér)\\
+$B=(n':\mathbb{N}^+)$ (paramétertér)\\
+$\forall b \in B: Q_b(a) = (n(a) = n'(b))$\\
+$\forall b \in B: R_b(a) = (n(a) = n'(b) \wedge d(a)|n(a))$\\
+Rövidebben:\\
+$Q=(n=n')$ (előfeltétel)\\
+$R=(Q \wedge d|n)$ (utófeltétel)
+
+\subsection{Példa}
+
+Adott egy egész szám. Növeljük meg 1-gyel!\\
+$A=(x:\mathbb{Z})$\\
+$B=(x':\mathbb{Z})$\\
+$Q=(x=x')$\\
+$R=(x=x'+1)$\\
+Helyesség belátása:\\
+$S=(x:=x+1)$, tehát ezt kell belátni: $Q \implies lf(x:=x+1, R)$\\
+R-ben helyettesítés: $Q \implies (x+1=x'+1)$\\
+Azaz: $(x=x') \implies (x+1=x'+1)$
+
+\pagebreak
+
+\section{Új jelölések}
+
+\begin{outline}
+	\1 Ha egy $l: \mathbb{L}$ igaz, akkor \textit{valami}: $l \to valami$
+	\1 Intervallum: $\forall i \in [1..n]: ...$
+	\1 Függvény: $f : \mathbb{Z} \to \mathbb{Z}$
+	\1 Tömb: $x:\mathbb{Z}^n$, ahol $n \in \mathbb{N}$ (n-t nem kell külön bevezetni)
+		\2 1-től indexelünk, meghozzá így: $x[1]$
+\end{outline}
+
+\section{Programkonstrukciók}
+
+\subsection{Szekvencia}
+
+\begin{outline}
+	\1 Legyen $S_1$ és $S_2$ program $A$ állapottéren
+	\1 $(S_1;S_2)$ reláció a két program szekvenciája
+	\1 $(S_1;S_2)(a) =$\\
+	$\{vs \in \overline{A}^\infty \;|\; vs \in S_1(a)\}$ \;\;\;($S_1$ végtelen vs-t ad)\\
+	$\cup \{vs \in (\overline{A} \cup \{fail\})^* \;|\; vs \in S_1(a) \wedge vs_{|vs|}=fail\}$ \;\;\;($S_1$ vs vége fail)\\
+	$\cup \{vs \in (\overline{A} \cup \{fail\})^{**} \;|\; vs=x \oplus y \wedge x \in S_1(a) \wedge |x| < \infty \wedge x_{|x|} \ne fail \wedge y \in S_2(x_{|x|}) \}$
+	\;\;\;($S_1$ vs véges és nem fail, ekkor $S_2$-vel folytatjuk)
+	\1 Nem adom meg a szekvencia állapotterét, csak a két programot: több lehetséges alap állapottér van, mert lehetnek segédváltozók.
+	\1 TODO ezeket ellenőrizni (hivatalos jegyzetben nincsenek benne)
+		\2 $p((S_1;S_2))=p(S_2) \odot p(S_1)$
+		\2 $D_{p((S_1;S_2))}=\{a \in D_{p(S_1)} \;|\; p(S_1)(a) \subseteq D_{p(S_2)} \}$
+\end{outline}
+
+\subsubsection{Szekvencia mint megoldó program}
+
+\begin{outline}
+	\1 $S_1$ megoldja $F_1$-t, $S_2$ megoldja $F_2$-t, $S$ legyen $(S_1;S_2)$
+	\1 $S$ nem oldja meg $F_2 \circ F_1$-t ($F_1$ legyen tágabb, stb... bonyolult)
+	\1 $S$ megoldja $F_2 \odot F_1$-t (hosszú a bizonyítás, gyakon nem is volt MÉG)
+\end{outline}
+
+\pagebreak
+
+\subsection{Elágazás}
+
+\begin{outline}
+	\1 Legyen $S_1,S_2,...,S_n$ programok, $\pi_1,\pi_2,...,\pi_n$ logikai függvények A felett
+		\2 azaz $\pi_i \in A \to L$, nem pedig $\pi_i : A \to L$
+	\1 $IF=IF(\pi_1:S_1,...,\pi_n:S_n)$
+		\2 $\forall a \in A: IF(a) = w_0(a) \cup \bigcup_{i=1..n}w_i(a)$
+		\2 $w_0(a)=\begin{cases}
+		\{<a,fail>\} \text{\;ha\;} \forall i \in [i..n]: (a \in D_{\pi_i} \wedge \lnot \pi_i(a))\\
+		\emptyset \text{\;különben}
+		\end{cases}$
+		\2 $w_i(a) = \begin{cases}
+		S_i(a) \text{\;ha\;} a \in D_{\pi_i} \wedge \pi_i(a)\\
+		\emptyset \;\;\;\;\; \text{\;ha\;} a \in D_{\pi_i} \wedge \lnot \pi_i(a)\\
+		\{<a,fail>\} \text{\;ha\;} a \not\in D_{\pi_i}\\
+		\end{cases}$
+	\1 Megjegyzések
+		\2 több $\pi_i$ egyszerre teljesül: mindet belerakjuk a halmazba
+		\2 $\pi_i$ valahova nem rendel semmit: fail-t is rendelünk oda (de a vs első eleme a valami)
+		(Emlékeztető: igazsághalmazzal megadott logikai fv megegyezés szerint mindenhova rendel valamit.)
+		\2 összes $\pi_i$ egyszerre hamis: fail-t rendelünk oda (de a vs első eleme a valami)
+\end{outline}
+
+\subsubsection{Programfüggvény}
+
+\begin{outline}
+	\1 $D_{p(IF)}=\{a\in A \;|\; a \in \bigcap D_{\pi_i} \wedge a \in \bigcup\lceil \pi_i \rceil \wedge (a \in \lceil \pi_i \rceil \implies a \in D_{p(S_i)} )\}$
+	\1 $p(IF)(a)=\bigcup_{i=1..n}\{ x \in p(S_i)(a) \; | \; a \in \lceil \pi_i \rceil\ \}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Ciklus}
+
+\begin{outline}
+	\1 Legyen $S$ program, $\pi$ logikai függvény $A$ felett
+	\1 $DO(\pi:S)$ az elöl tesztelő ciklus ($S$ ciklusmag, $\pi$ ciklusfeltétel)
+		\2 $DO(a)=\begin{cases}
+			(S;DO)(a) \text{\;ha\;} a \in D_\pi \wedge \pi(a)\\
+			<a> \;\;\;\;\;\;\; \text{\;ha\;} a \in D_\pi \wedge \lnot \pi(a)\\
+			<a,fail> \text{\;ha\;} a \not \in D_\pi
+			\end{cases}$
+		\2 végtelen ciklus jelölése:
+			\3 $DO(\pi:S)=\{1 \to <1,1,1...>\}$
+			\3 $DO(\pi:S)=\{1 \to <1,(2,3,1)^{\infty}...>\}$
+			\3 $DO(\pi:S)=\{1 \to <1,(2,3,1)^*,4>\}$ (*: véges sokszor)
+	\1 Programfüggvények:
+		\2 TODO $p(DO)$ és $D_{p(DO)}$ =?
+		\2 $D_{p(S)} \not \subseteq D_{p(DO)}$ (mert: IGAZ és SKIP)
+		\2 $D_{p(DO)} \not \subseteq D_{p(S)}$ (mert: HAMIS és ABORT)
+\end{outline}
+
+\pagebreak
+
+\section{Levezetési szabályok}
+
+\subsection{Szekvencia levezetési szabálya}
+
+\begin{outline}
+	\1 Legyen $S=(S_1;S_2)$ program és $Q,Q',R$ logikai függvény
+	\1 Ha $Q \implies lf(S_1,Q')$ és $Q' \implies lf(S_2,R)$
+	\1 Akkor (és csak akkor) $Q \implies lf(S,R)$
+	\1 Magyarázat: $Q \implies lf(S,R)$ jelentése: $S$ elvisz $Q$-ból $R$-be
+		\2 Szóval: $Q \to (S_1) \to Q' \to (S_2) \to R$
+\end{outline}
+
+\subsection{Elágazás levezetési szabálya}
+
+\begin{outline}
+	\1 Legyen $IF=IF(\pi_1:S_1,...,\pi_n:S_n)$ és $Q,R$ logikai függvény 
+	\1 Ha
+		\2 $Q \implies AND_{i=1}^{n} \pi_i \lor \lnot \pi_i$ \;\; (mindegyik mindenhol értelmes)
+		\2 $Q \implies OR_{i=1}^{n} \pi_i$ \;\; (mindenhol legalább egy teljesül)
+		\2 $\forall i \in [1..n]: Q \wedge \pi_i \implies lf(S_i,R)$ \;\; (bármelyik ágon $R$ igaz lesz)
+	\1 Akkor $Q \implies lf(IF,R)$
+\end{outline}
+
+\subsection{Ciklus levezetési szabálya}
+
+\begin{outline}
+	\1 Legyen $DO=DO(\pi:S)$ és $P,Q,R$ logikai függvény, ahol $P$ invariáns\\
+	és $t:A \to \mathbb{Z}$ termináló állítás
+	\1 Ha
+		\2 $Q \implies P$ \;\; (invariáns alapból teljesül)
+		\2 $P \wedge \lnot \pi \implies R$ \;\; (jó helyen áll meg)
+		\2 $P \implies \pi \lor \lnot \pi$ \;\; (ciklusfeltétel nem abortál)
+		\2 $P \wedge \pi \implies t > 0$ \;\; (cikluson belül van még lépés)
+		\2 $P \wedge \pi \wedge t = t_0 \implies lf(S,P \wedge t<t_0)$ \;\; (invariáns marad, lépés\;-\;-)
+	\1 Akkor $Q \implies lf(DO,R)$
+	\1 $P$ az invariáns állítás, $t$ a terminálófüggvény (hány lépés van hátra)
+\end{outline}
+
+\pagebreak
+
+\section{Helyességbizonyítás}
+
+\subsection{Módszere}
+
+\begin{outline}
+	\1 Be akarjuk látni, hogy $S$ megoldja az $A,B,Q,R$ specifikációjú feladatot.
+	\1 1. lépés: ST (Specifikáció Tétele) miatt elég belátni: $Q \implies lf(S,R)$
+	\1 2. lépés: fenti állítás belátása, $S$-től függően:
+		\2 értékadás/kiválasztás: közvetlenül belátható ($R$-be behelyettesítés)
+		\2 szekvencia: SZLSZ (Szekvencia Levezetési Szabálya) használata
+		\2 elágazás: ELSZ (Elágazás Levezetési Szabálya) használata
+		\2 ciklus: CLSZ (Ciklusz Levezetési Szabálya) használata
+	\1 A 2. lépésben rekurzívan ismételjük a 2. lépést, amíg be nem látunk minden állítást.
+\end{outline}
+
+\subsection{Megvalósítási tippek}
+
+\begin{outline}
+	\1 Belátok valamit, ami nem definícióból következik (pl. $1<2$): PIPA
+	\1 Értékkiválasztás: $lf(x:\in h, x \; even) = (h \ne \emptyset \wedge \forall e \in h : e \; even)$
+	\1 $Q \implies ...$ esetén vegyem úgy, hogy $Q$ igaz és lássam be $...$-ot
+	\1 ($\forall k \in [1..n]: x[k]=...$)-on ($x[i]=...$) végrehajtása: $\forall k$ 3 részre bontása: ($\forall k \in [1..i-1]: ...$) és ($x[i]=...$) és ($\forall k \in [i+1..n]: ...$)
+	\1 $\lor$ (vagy)-ból következés: esetszétválasztás, akár negált is felhasználható, pl.: ($a \lor b \implies ...$)-nél: ($a \implies$) vagy ($\lnot a \wedge b \implies$)
+	\1 Értékadások és számolások, amik abortálhatnak:
+		\2 $a := b$ ahol $a : A$ és $b : B$ abortál, ha $B \not \subseteq A$
+		\2 $a \mod b$ abortál, ha $b=0$
+		\2 $x[i]$ ahol $x:\mathbb{Z}^n$ abortál, ha $i \notin [1..n]$
+\end{outline}
+
+\section{Pszeudokód jelölések}
+
+\begin{outline}
+	\1 Ciklus: $while \; VALAMI \; do \; [...] \; od$
+\end{outline}
+
+\pagebreak
+
+\section{Párhuzamos programok}
+
+\begin{outline}
+	\1 Értékadás és feltétel kiértékelés nem megszakítható (atomikus)
+\end{outline}
+
+\subsection{Annotációk (pl. $\{Q_7\}$)}
+
+\begin{outline}
+	\1 Egy program egy adott pontjához egy logikai függvény: elő/utófeltétel.
+	\1 Segédváltozókat is felvehetünk ennek érdekében. Ezzel a program megváltozik, de a helyessége nem: a segédváltozók nem módosítjak a nem-segédeket.
+\end{outline}
+
+\subsection{Atomi program}
+
+\begin{outline}
+	\1 $[S](a) = S(a)$
+	\1 Atomikus: nem megszakítható
+	\1 $S$ nem tartalmazhat sem ciklust, sem várakoztató utasítást (?)
+	\1 Levezetési szabály:
+		\2 Ha $Q \implies lf(S,R)$
+		\2 Akkor $Q \implies lf([S],R)$
+\end{outline}
+
+\subsection{Várakoztató utasítás}
+
+\begin{outline}
+	\1 $\beta \in A \to \mathbb{L}$ (őrfeltétel)
+	\1 Stukis jelölés: szekvencia, ahol a felső rész felet boltív van ($\cap$)
+	\1 $(await \; \beta \; then \; S \; ta)(a) = $
+		\2 ha $a \in D_\beta \wedge \beta(a)$ akkor $[S](a)$ \;\; ($\beta$ és $S$ együtt atomikus)
+		\2 ha $a \in D_\beta \wedge \lnot \beta(a)$ akkor $(skip,await \; \beta \; then \; S \; ta)(a)$
+		\2 ha $a \notin D_\beta$ akkor $<a,fail>$
+	\1 Levezetési szabály
+		\2 Ha
+			\3 $Q \implies \beta \lor \lnot \beta$ \;\; ($\beta$ kiértékelhető)
+			\3 $Q \wedge \beta \implies lf(S,R)$
+		\2 Akkor $Q \implies lf(await \; \beta \; then \; S \; ta,R)$
+	\1 $S$ nem tartalmazhat sem ciklust, sem várakoztató utasítást (?)
+\end{outline}
+
+\pagebreak
+
+\subsection{Párhuzamos blokk}
+
+\begin{outline}
+	\1 $S_i$: komponens programok
+		\2 vagy $S_i$ atomikus (nem megszakítható)
+		\2 vagy $S_i=(u_i,T_i)$ ahol $u_i$ az első utasítás, $T_i$ a többi
+	\1 Stukis jelölés: $x:=x+2 \; || \; x := 0$
+	\1 $(parbegin \; S_1||...||S_n \; parend)(a)=\bigcup_{i=1}^n B_i(a)$
+	\1 $B_i(a) = $
+		\2 ha $S_i$ atomikus: $(S_i;parbegin \; S_1||...||S_{i-1}||S_{i+1}||...||S_n \; parend)(a)$
+		\2 ha $S_i=(u_i,T_i)$: $(u_i;parbegin \; S_1||...||S_{i-1}||T_i||S_{i+1}||...||S_n \; parend)(a)$
+	\1 Holtpontra jutott, ha minden be nem fejeződött komponense
+		\2 vagy egy várakoztató utasítás, aminek őrfeltétele hamis (azaz blokkolt)
+		\2 vagy egy szekvencia, amelyben van blokkolt várakoztató utasítás
+	\1 Levezetési szabály: (PLSZ)
+		\2 Legyenek $Q_i$ és $R_i$ ($i=[1..n]$) logikai függvények (annotációk)
+		\2 Ha
+			\3 $Q \implies Q_1 \wedge ... \wedge Q_n$ \;\; (belépési feltétel)
+			\3 $R_1 \wedge ... \wedge R_n \implies R$ \;\; (jó helyen állunk meg)
+			\3 $\forall i \in [1..n] : Q_i \implies lf(S_i,R_i)$
+			\3 $Q_i \implies lf(S_i,R_i)$ teljes helyességi interferencia formulák interferenciamentesek
+			\3 párhuzamos blokk holtpontmentes
+		\2 Akkor $Q \implies lf(parbegin \; S_1||...||S_n \; parend, R)$
+\end{outline}
+
+\subsection{Kritikus utasítás}
+
+\begin{outline}
+	\1 Vagy egy értékadás
+	\1 Vagy egy atomikusan végrehajtott program, ami tartalmaz értékadást
+		\2 A várakoztató utasítás atomikus!!!
+\end{outline}
+
+\pagebreak
+
+\subsection{Interferenciamentesség}
+
+\begin{outline}
+	\1 Legyen $u$ egy $pre_u$ előfeltételű kritikus utasítás $S_i$-ben
+	\1 Legyen $s$ egy tetszőleges, $pre_s$ előfeltételű utasítás $S_j$-ben ($S_j$ tetszőleges)
+	\1 $u$ nem interferál a $Q_j \implies lf(S_j,R_j)$ teljes helyességi formulával ha:
+		\2 $pre_u \wedge R_j \implies lf(u,R_j)$ \;\; ($u$ végrehajtása nem rontja el $R_j$-t)
+		\2 $pre_u \wedge pre_s \implies lf(u,pre_s)$ \;\; ($u$ végrehajtása nem rontja el $pre_s$-t)
+		\2 $pre_u \wedge t=t_0 \implies lf(u, t \le t_0)$\\
+		ahol $t$ egy tetszőleges $S_j$-beli ciklus terminálófüggvénye \\
+		($u$ végrehajtása miatt nem "számol" visszafelé ciklus)
+	\1 Gyakorlatban:
+		\2 $Q_1 = (x=0)$; $Q_2=igaz$
+		\2 $R_1=R_2 = (x=0) \lor (x=2)$
+		\2 be kell látni: $1 \leadsto 2: \{Q_1\}x := x+2 \leadsto Q_2,R_2$
+			\3 első rész: $R_2 \wedge Q_1 \implies lf(x:=x+2, R_2)$
+			\3 második rész: $Q_2 \wedge Q_1 \implies lf(x := x+2, Q_2)$
+		\2 be kell látni: $2 \leadsto 1: \{Q_2\}x := 0 \leadsto Q_1,R_1$
+			\3 Ha 1 ciklus lenne: $\{Q_2\}x := 0 \leadsto Q_1,R_1,P$ és fenti $t$-s
+			\3 Ha nincs közös változó: "nincs krit. ut. az 1. ágra nézve"
+		\2 Alternatíva: "elég" belátni: a kritikus utasítás egy annotációt sem ront el,
+		valamint a ciklus terminálófüggvény sem számol felfelé.
+		\2 Emlékeztető: hamis bármit implikál ($\implies$ előtt ellentmondás)
+\end{outline}
+
+\pagebreak
+
+\subsection{Elégséges feltétel holtpontmentességre}
+
+\begin{outline}
+	\1 Legyen $m$ $await$ és $n$ párhuzamos blokk egy $S$ szekvenciában
+		\2 $A_m: await \; \beta_m \; then \; S_m \; ta$
+		\2 $T_n : parbegin \; S^n_1||...||S^n_{n_n} \; parend$
+	\1 $D(S)=[\bigvee_{j=1}^{m} (pre(A_j) \wedge \lnot \beta_j)] \lor [\bigvee_{k=1}^{n}D1(T_k)]$
+		\2 vagy egy $await$ miatt várok
+		\2 vagy egy párhuzamos blokk van holtpontban
+	\1 $D1(T_k) = [\bigwedge_{j=1}^{n_k} (post(S_i^k) \lor D(S_i^k))] \wedge [\bigvee_{i=1}^{n_k}D(S_i^k)]$
+		\2 az összes komponens már befejezedőtött vagy holtpontban van
+		\2 és legalább egy komponens holtpontban van
+	\1 Ha $D(S)=HAMIS$, akkor biztosan nincs holtpont. Egyébként nem mondunk semmit.
+\end{outline}
+
+\subsubsection{Holtpontmentesség: egy await egy kétágú párhuzamos blokkban}
+
+\begin{outline}
+	\1 Legyen $S=parbegin \; (await \; \beta \; then \; S_1 \; ta) \; ||\; S_2 \; parend$
+	\1 Bizonyítás nélkül használható tény: csak akkor van ekkor holtpont ha\\
+	$pre(await \; \beta \; then \; S_1 \; ta) \wedge \lnot \beta \wedge post(S_2)$
+	\1 Ha ez ellentmondást ad ($=hamis$), akkor nincs holtpont
+\end{outline}
+
+\subsubsection{Holtpontmentesség: két await egy kétágú párhuzamos blokkban}
+
+\begin{outline}
+	\1 Legyen $S=parbegin \; (await \; \beta_1 \; then \; S_1 \; ta) \; ||\; (await \; \beta_2 \; then \; S_2 \; ta) \; parend$
+		\2 Átfogalamzva: $S=parbegin \; A_1||A_2 \; parend$
+	\1 Bizonyítás nélkül használható tény: csak akkor van ekkor holtpont ha
+		\2 vagy: $pre(A_1) \wedge \lnot \beta_1 \wedge post(A_2)$
+		\2 vagy: $pre(A_2) \wedge \lnot \beta_2 \wedge post(A_1)$
+		\2 vagy: $pre(A_1) \wedge \lnot \beta_1 \wedge pre(A_2) \wedge \lnot \beta_2$
+	\1 Ha ez ellentmondást ad ($=hamis$), akkor nincs holtpont
+\end{outline}
+
+\subsubsection{Holtpontmentesség: nincs await}
+
+\begin{outline}
+	\1 Mindig holtpontmentes.
+\end{outline}
+
+\end{document}

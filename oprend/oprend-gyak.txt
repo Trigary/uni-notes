@@ -1,0 +1,446 @@
+Struct:
+	typedef struct { long cat; char message[50]; } msg_t;
+	msg_t x = { 5, "CYCSS7" };
+
+Manuál:
+	általában: `man fvnév` vagy `man fvnév.#` (#=2,3)
+
+string.h:
+	strcpy: copy
+	strcat: append
+	strlen: length
+	strcmp: compare
+	string literál: array-nak adva mutable, egyébként immutable
+
+Memóriafoglalás:
+	malloc (sikertelen -> NULL-t ad vissza)
+	realloc (sikertelen -> NULL-t ad vissza -> temp-be realloc-oljunk először, hogy ne vesszen el az előző alloc)
+	free (null -> nem csinál semmit)
+Memóriamozgatás:
+	memcpy: közvetlen
+	memmove: először átmeneti helyre másol -> használni akkor, amikor az src és dst átfedésben van
+
+Paraméterek:
+	int main(int argc, char *argv[]) { ... }
+	argv[0]: program neve  => argc mindig legalább 1
+
+Standard IO:
+	scanf és printf különböző formátumot használ, pl. long long int-hez
+	scanf
+		max adott mennyiség beolvasása: scanf("%20s", inputOfLength21);
+		max n karakter beolvasása, sor maradékának eldobása:
+			int read;
+			scanf("%20[^\n]%n", array, &read); //%n: mennyi karaktert olvastam ki
+			char temp;
+			do {
+				scanf("%c", &temp);
+			} while (temp != '\n' && temp != EOF);
+		' %s': eldobja a whitespace-t a szöveg előtt
+	printf
+
+Random:
+	rand(): egész, [0, MAX_RAND]
+	rand() % B: egész, [0, B-1]
+	rand() % (B-A+1) + A: egész, [A, B]
+	srand(time(NULL));
+
+Felhasználó:
+	getpwuid, getpwnam: adatok lekérdezése
+
+Idő:
+	time(NULL): pillanatnyi idő
+	ctime: time_t -> szöveg, végén soremelés
+	localtime: time_t t-> tm
+	struct tm: tm_sec, tm_mday, tm_mon, tm_yday, ....
+
+Fájlrendszer:
+	stat: fájl adatainak lekérdezése (man stat.2)
+Könyvtár bejárás:
+	opendir
+	readdir
+	closedir
+Fájlkezelés:
+	access: fájlhoz való hozzáférés ellenőrzése: if (access(filename, F_OK | R_OK | W_OK) != 0) { perror("File access error"); exit(1); }
+Fájlkezelés stream függvényekkel: (ritkán használt)
+	Mintafüggvények (open_fopen.c): use_fopen_text(), use_fopen_bin()
+	FILE*, fopen, fclose
+	szöveges: fprintf, fputc, fputs, fgetc, fgets
+		fprintf: mint a printf
+		fgets: új sorig olvas, de az is benne van az eredményben; NULL ha 0 karaktert tudott kiolvasni (pl. EOF miatt)
+	bináris: fwrite, fread
+		használat tömbök esetén: fread/fwrite(array, sizeof(array[0]), sizeof(array)/sizeof(array[0]), file)
+		használat egye elem esetén: fread/fwrite(&value, sizeof(value), 1, f)
+	fopen: igazzá válik az első EOF miatt sikertelen beolvasás után
+		mód: r (olvasás), r+ (olvasás+írás, elejéről)
+		     w (írás, truncate/create), w+ (olvasás+írás, truncate/create)
+			 a (append, create), a+ (olvasás+append, create)
+	    visszatérési érték: fájl mutató vagy NULL (hiba)
+	fclose: EOF-t ad vissza, ha hiba
+	feof: fájl végénél járunk-e, azaz elértük-e a fájl végét
+	clearerr: hiba bitek hamissá tétele, pl. írás előtt
+	fseek: file író/olvasó mutató mozgatása, visszaadja az abszolút pozíciót (END esetén negatív pozíció kell)
+
+Fájlkezelés rendszerhívásokkal: EZT JAVASOLT HASZNÁLNI
+	use_open_bin(): bináris MINTAFÜGGVÉNY
+	int fileazonosító
+	open:
+		Egyik ezek közül kötelező: O_RDONLY, O_WRONLY, O_RDWR
+		3 paraméteres O_CREAT vagy O_TMPFILE esetén, mód a chmod, pl.: 0644
+		nem létezik, létrehozza; létezik, hiba: O_CREAT | O_EXCL
+		nyitáskor nullázás: O_TRUNC
+	close
+	read, write:
+		tömb változó: read/write(f, array, sizeof(array))
+		scalar változó: read/write(f, &value, sizeof(v))
+		string esetén: sizeof(array) helyett strlen(pointer)
+		hiba esetén -1-et ad vissza
+	lseek: mint az fseek
+Fájl zárolás:
+	fcntl(fileid, F_SETLKW/F_SETLK, &flock): fájl zárolás (fcontrol)
+		F_SETLKW: vár, amíg eltűnik a lock
+		F_SETLK: visszatérési érték -1, ha sikertelen
+	struct flock:
+		short l_type: F_RDLCK, F_WRLCK, F_UNLCK
+		short l_whence: SEEK_SET, SEEK_CUR, SEET_END (általában SEEK_SET)
+		off_t l_start: lock kezdőpozíciója (általában 0)
+		off_t l_len: lock-olt bájtok száma, 0->összes
+		off_t l_pid: lock-oló folyamat PID-je (nem kötelező megadni)
+
+Hibakezelés:
+	errno: változó, legutóbb bekövetkezett hiba
+	perror: errno-hoz tartozó hibaüzenet kiírása, pl.: if (x == NULL) { perror("Error opening file\n"); }
+
+Folyamatkezelés:
+	pid_t ~ int
+	fork(): szülő folyamatban >0 vagy -1, ha hiba, gyerekben 0
+	getpid: saját pid
+	getppid: szülő folyamat pid-je
+		ha a szülő már befejeződött: rendszerfüggő??? megváltozik a szülője a gyakorlatban
+	int wait(&status): bármelyik (közvetlen) gyerek befejezésére vár
+		nem vár semennyit, ha nincsen futó gyerek
+		&status lehet NULL
+	int waitpid(pid, &status, opt)
+		adott (közvetlen) gyerek jelzésére vár
+		pid=-1 -> bármelyik
+		opt: melyik jelzésre, 0->befejezés
+	sleep, usleep: szignál-t vár, max X ideig
+		NE HASZNÁLJUK HA KÜLÖN NEM KÉRTEK MEG RÁ
+	execv, execl: másik program betöltése, eredeti PID megtartása
+		parancs utáni kód soha nem fog lefutni
+		execv: paraméterek egy string tömbben
+		execl: paraméterek felsorolva szerepelnek, null-al lezárva
+			példa: execl("/bin/ls", "ls", NULL);
+		Első paraméter: futtatandó fájl neve
+	system(char*): létrehoz gyereket, vele végrehajtat egy külső programot, de MEGVÁRJA (NEM párhuzamos)
+
+Szignálok:
+	kill: szignál küldése
+		pid=0 -> azonos csoportban lévők (szülő+gyerek)
+		pid=-1 -> mindenki, aki felé van jogunk
+		Linux parancsként: kill -SIGTERM <pid>
+	raise: önmagunknak szignál küldése
+	pause: vár egy új szignálra (már megérkezettek nem érdekli őt)
+		blokkolt szignált se kap meg
+		NE HASZNÁLJUK HA KÜLÖN NEM KÉRTEK MEG RÁ
+			"megoldás": wait(NULL)-at használhatok, ami interrupt-olva lesz szignál esetén
+	sighandler_t signal(int signum, sighandler_t handler): szignálkezelő megadása
+		signum: lista: kill -l, de vannak konstansok
+		handler: függvénypointer (név) / SIG_IGN (ignore) / SIG_DFL (default)
+		SIG_IGN: nem azonos az üres kezelővel: így pl. a pause soha nem kapja meg a signalt
+	sighandler_t: void handler(int signum) {...}
+	psignal: mint a perror
+	SIGKILL, SIGSTOP: kivétel, ezeket nem lehet befolyásolni
+
+Szignál halmazok, szignál maszkok:
+	return majdnem mindegyiknél: 0 (siker) vagy -1 (hiba)
+	sigset_t: szignál halmaz
+	int sigemptyset(sigset_t *set): üres sigset
+		hasonlóan: sigfillset
+	int sigaddset(sigset_t *set, int signum): sigset-hez hozzáadás
+		hasonlóan: sigdelset
+	int sigismember(const sigset_t *set, int signum): 0 (nem), 1 (igen), vagy -1 (hiba)
+	int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
+		lehet NULL: oldset vagy set
+		how=SIG_BLOCK: blokkolt = régi unió új
+		how=SIG_UNBLOCK: blokkolt = régi setminus új
+		how=SIG_SETMASK: blokkolt = új
+	int sigsuspend(const sigset_t *mask): vár amíg bármilyen nem blokkolt szignál meg nem érkezik
+		return mindig -1 (vagy terminál a processz)
+		szignál maszkot lecseréli az új maszkra átmenetileg, visszatérés után visszaáll a régi szignál maszk
+		szignál maszkban lévő értékek = mi van blokkolva
+	Szignálok megérkezésének sorrendje nem definiált (kivéve: real-time szignálok)
+	Egy szignál csak egyszer érkezhet meg blokkolás után (nincs queue, csak flag)
+	Real-time (valós idejű) szignálok: ha fontos, hogy annyi érkezzen, ahány küldve volt
+		SIGRTMIN és SIGRTMAX közé eső szignálok (konkrét szám változhat!)
+		Prioritásosak: SIGRTMAX a fontos, ez mindent beelőz (a nem realtime-ot is, ők a SIGRTMIN alatt vannak)
+		Ugyan az a szignál többször is megérkezhet blokkolás után (van priority queue)
+		Kötelező gcc kapcsoló ilyenkor: -lrt (gcc x.c -lrt)
+		Más különbség nincsen: egyébként hasonló a user defined szignálokhoz
+
+Szignálok összetett handler-rel:
+	void handler(int signo, siginfo_t* info, void* context) {...}
+	struct siginfo_t:
+		si_code (ki küldte): SI_USER, SI_QUEUE (sigqueue), SI_TIMER, SI_MESGQ (üzenetsor)
+		si_pid: küldő PID-je
+		si_value: sival_int vagy sival_ptr (ez egy union)
+	struct sigaction:
+		sa_sigaction: kezelő függvény (pointer) vagy SIG_DFL (default) vagy SIG_IGN (ignore)
+		sa_mask (sigset_t): kezelő függvény  végrehajtása során mi más legyen még eddigieken felül blokkolva
+			handler-ben blokkolva van: folyamatban blokkolva volt + kapott signal + itt megadott signalok
+		sa_flags (bitflag): SA_SIGINFO-t kell megadni, ha összetett handlert akarunk használni (egyébként 0 és alap handler lesz)
+	int sigaction(int signum, struct sigaction *act, struct sigaction *oldact): handler regisztrálása
+		oldact lehet NULL (nem is volt róla szó)
+		visszatérési érték: 0 (siker), -1 (hiba)
+	int sigqueue(pid_t pid, int sig, union sigval value): kill-hez hasonlít, de extra adotot is küld
+		visszatérési érték: 0 (siker), -1 (hiba)
+
+Szignál kezelése folyamatból (külső handler helyett):
+	int sigwaitinfo(sigset_t *set, siginfo_t *info)
+		set-ben lévő szignálra vár
+		visszatérési érték: érkezett szignál száma vagy -1 (hiba)
+		ilyenkor a handler nem fut le, de szükséges: a default handler megöli a folyamatot
+	int sigtimedwait(sigset_t *set, siginfo_t *info, struct timespec *timeout)
+		max X ideig vár szignálra (azon kívül: ~ sigwaitinfo)
+		visszatérési érték lehet még -1, ha timeout
+		0 ideig várakozás => egyből visszatér (dokumentált működés)
+	struct timespec: tv_sec, tv_nsec (hasonlít struct timeval-ra)
+
+Időzítés:
+	egy programban csak egyfélét szabad használni
+	szignált küld (saját magának) amikor lejár az idő
+	máshogy műkdöik signal érkezés esetén, mint a sleep (????)
+	egyszerű: alarm(unsigned int seconds) -> SIGALRM megadott idő után
+	ismétlődő:
+		struct timeval: tv_sec, tv_usec (összegük számít)
+		struct itimerval (ezek timeval típusúak): it_interval (0 -> egyszeri), it_value (0 -> leállítás)
+		setitimer(ITIMER_XYZ, struct itimerval *new_value, struct itimerval *old_value)
+			ITIMER_REAL -> SIGALRM, ITIMER_VIRTUAL -> SIGVTALARM
+			old_value lehet NULL
+		getitimer(struct itimerval *curr_value): hol tart az időzítő?
+		visszatérési érték: 0 (siker), -1 (hiba)
+	tetszőleges szignál és érték küldése:
+		visszatérési értékek: 0 (siker), -1 (hiba)
+		timer_create(CLOCK_REALTIME, struct sigevent *sevp, timer_t *timerid)
+			timerid: kiementi változó
+		struct sigevent:
+			sigev_notify: SIGEV_NONE (semmi nem történik idő végén), SIGEV_SIGNAL
+			sigev_signo: melyik szignált küldje
+			sigev_value: szignállal küldendő union
+		struct itimerpsec (adataggjai timespec): it_interval (köztes idő), it_value (első előtti várakozás)
+		timer_settime(timer_t timerid, int flags, struct itimerspec *new_value, struct itimerspec *old_value)
+			beállítja és elindítja az időzítőt
+			old_value: lehet NULL
+			flags: hagyjam üresen, újraindítás esetén nullázás: TIMER_ABSTIME
+		timer_gettime(timer_t timerid, struct itimerspec *curr_value)
+		timer_delete(timer_t timerid)
+
+Cső (pipe):
+	Névtelen cső: pipe(int pipefd[2])
+		fork előtt kell meghívni
+		0. index: olvasásra fileid, használat: read
+			mindaddig vár, amíg van benne adat és nem lett lezárva a cső
+		1. index: írásra fileid, használat: write
+			kevesebbet írt ki, mint akart: be lett zárva a cső
+		visszatérési érték: 0 (siker), -1 (hiba)
+		close: mindkét végét le kell zárni
+	Nevesített cső (named pipe):
+		konkrét fájlba írja a dolgokat, szóval akár 1 nap késéssel is mehet az olvasás
+		használat: szülő létrehozza
+		mkfifo(fájlnév, engedélyek): létrehozás
+			megengedett könyvtár (opsys szerveren): /tmp/-ben
+			engedélyek: S_IRUSR, S_IWUSR, 0666, S_I[R|W][USR|GRP|OTH]
+			utána minden processzben: meg kell nyitni (open) és le kell zárni (close)
+			O_RDONLY: O_WRONLY: open addig vár, amíg a másik irány nem nyílt meg (O_RDWR az nem)
+			read, write ugyan úgy működik (csak várakoznak, amíg az olvasás/írás teljesen végbement, kivéve az O_RDWR pipe)
+			hibát dob, ha már létezik a fájl
+		unlink(fájlnév): cső törlése
+
+Pollolás (poll):
+	pollfd:
+		fd: cső (file) azonosító
+		events: figyelt esemény, pl.: POLLIN (van olvasható adat), POLLOUT (lehet írni)
+		revents: bekövetkezett esemény, pl.: POLLHUP (olvasási vég lezárva)
+	int poll(struct pollfd *fds, nfds_t nfds, int timeout):
+		fds egy tömb, ndfs pedig a tömb mérete
+		ha a bemenet POLLIN és a kimenet is POLLIN, akkor van olvasható adat
+			ha a bemenet POLLIN, de a kimenet nem: kiolvasva a revents-et megkapom, hogy miért nem olvasható
+		visszatérési érték: miért lépünk tovább (ezek egyikéig vár, szóval alapból vár pozitív válaszig)
+			pozitív: van pozitív válasz
+			0: időtúllépés
+			negatív: szignál
+	ppoll: átmenetileg lecseréli a szignál maszkot, azon kívül ugyan az
+
+Pollolás #2 (select):
+	fd_set
+		void FD_ZERO(fd_set *set): set kiürítése
+		void FD_SET/FD_CLR(int fd, fd_set *set): setbe hozzáadás/törlés
+		int FD_ISSET(int fd, fd_set *set)
+	select(int nfds, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout)
+		ndfs: MAX(max(writendfs), max(readndfs)) + 1   (nem mondta el, hogy miért)
+		exceptndfs: nem foglalkozunk vele, TOOD lehet-e NULL
+		visszatérési érték: mint a poll-nál, ugyan úgy várakozik is
+		azt hagyja benne a készletben, amelyikre pozitív a válasz
+
+IPC (InterProcess Communication), System V
+	3 rész: message queues, shared memory segments, semaphore sets
+	Parancssorból:
+		ipcs: listázás
+		ipcrm -a: töröl minden üzenetsort, osztott memóriát, szemafort
+			opsys szerveren csak a sajátunkat törli (többire hibát ad)
+	key_t ftok(char* path, int id): kulcs generálás
+		szöveg (valid path, pl. /tmp) és szám (8 bit) alapján generálja a kulcsot
+		valid path: egyes parancsokhoz létező kell, egyesek nem létezőt is elfogadnak
+		egyszerű valid path: argv[0]
+		alternatíva: IPC_PRIVATE
+
+System V üzenetsorok:
+	System V IPC-s shell parancsok használhatók -q/-Q kapcsolóval
+		ipcs: listázás
+		ipcrm -q <azon>: törlés
+		ipcmk -Q: készítés
+	ez is a POSIX része: POSIX átvette
+	int msgget(key_t key, int msgflg): létrehozás/csatlakozás
+		kulcs: ftok-kal generált kulcs vagy IPC_PRIVATE (automatikus generálás)
+		flag: meglévő esetén 0, létrehozáshoz IPC_CREAT és jogosultságok (pl. 0666)
+		visszatérési érték: -1 (hiba) vagy egy id
+	törlés: msgctl(<mq_id>, IPC_RMID, NULL)
+		visszatérési érték: 0 vagy -1 (hiba)
+	üzenet struktúra: nem kötött, én hozom létre a struktot, de kötelezően 2 adattag
+		első addattag: long, 'msgtype', 'message type'
+		második adattag: bármi, payload
+	int msgsnd(int msqid, void* msgp, size_t msgsz, int msgflg): küldés
+		stuktúra memóriacímét kell átadni
+		második adattag méretét kell átadni (!!!), azaz sizeof(my_struct.masodik)
+		flag: 0 működik
+		visszatérési érték: 0 vagy -1 (hiba)
+	ssize_t msgrcv(int msqid, void* msgp, size_t msgsz, long msgtyp, int msgflg): fogadás
+		első három paraméter: mint küldésnél
+		msgtyp == 0 -> FIFO-ként következő bármilyen kategóriájú üzenet kiolvasása
+		msgtyp != 0 -> FIFO még mindig, de filter-elünk adott kategóriára
+		flag: 0 működik
+		visszatérési érték: második (!!!) adattagba beolvasott bájtok száma vagy -1 (hiba)
+
+POSIX prioritásos üzenetsorok:
+	man mq_overview
+	Kötelező gcc kapcsoló ilyenkor: -lrt (gcc x.c -lrt)
+	queue maximális mérete: 10
+	üzenet maximális mérete: 8192
+	mqd_t mq_open(char* name, int oflag, mode_t mode, struct mq_attr* attr): létrehozás/csalakozás
+		név: pl. /cycss7 ('/' jellel kezdődik, utána pedig csak karakterek)
+		flag: O_RDONLY vagy O_WRONLY vagy O_RDWR és ezen kívül lehet OR-onli...
+			O_CREAT: létrehozás
+			O_EXCL: létehozás legyen sikertelen, ha már létezik
+			O_NONBLOCK: létrehozáskor kell odaadni, ilyenkor írás/olvasás nem blokkol, hanem EAGAIN-nel fail-el
+		Ezek a paraméterek csak létrehozáskor kellenek:
+			mode: milyen jogokkal hozzuk létre, pl. 0666
+			mq_attr: NULL -> legtágabb, nem NULL -> szűkítés (max queue méret, stb)
+	prioritás: nagyobb szám a fontosabb, legalább 0-tól 31-ig szabályos
+	int mq_send(mqd_t mqdes, char* msg_ptr, size_t msg_len, unsigned int msg_prio): küldés
+		visszatérési érték: 0 vagy -1 (hiba)
+	ssize_t mq_receive(mqd_t mqdes, char* msg_ptr, size_t msg_len, unsigned int* msg_prio): fogadás
+		buffer mérete: állítólag legalább annyi, mint a message queue-ban beállított üzenet méret (alapból 8192)
+		msg_ptr: milyen prioritásút olvastunk (ez nem egy filter, hanem egy kimeneti változó)
+		visszatérési érték: beolvasott bájtok száma vagy -1 (hiba)
+	int mq_close(mqd_t mqdes): lekapcsolódás (üzenetsor még él)
+		visszatérési érték: 0 vagy -1 (hiba)
+	int mq_unlink(char* name): üzenetsor törlése
+		visszatérési érték: 0 vagy -1 (hiba)
+	int mq_notify(mqd_t mqdes, struct sigevent* sevp): szignált kapok, majd ha a sor üres volt ÉS új üzenet jött
+		NEM blokkol
+		csak egy feliratkozó lehet: új feliratkozás törli az előzőt
+		ha kaptam szignált, akkor a feliratkozás törlődik
+		nem kapok szignált, ha egy másik process kiolvassa az üzenetet (olvasás metódus meg van hívva és blokkol)
+		visszatérési érték: 0 vagy -1 (hiba)
+
+Osztott memória (IPC, System V):
+	System V IPC-s shell parancsok használhatók -m/-M kapcsolóval
+		ipcs: listázás
+		ipcrm -m <azon>: törlés
+		ipcmk -M <méret>: létrehozás
+	Foglalás működési
+		Foglalás laponként működik: 1 bájt foglalása esetén is 4096 bájt lesz felhasználva
+	int shmget(key_t key, size_t size, int shmflg): létrehozás, megnyitás
+		kulcs: mint eddig (ftok-kal generált kulcs vagy IPC_PRIVATE automatikus generáláshoz)
+		méret: kívánt méret (csatlakozáskor megadható kevesebb, mint amennyivel létre lett hozva)
+		flag: meglévő esetén 0, létrehozáshoz IPC_CREAT | <hozzáférési jogok>
+		visszatérési érték: -1 ha hiba, egyébként azonosító
+	int shmctl(int shmid, int cmd, struct shmid_ds* buf): törlés
+		cmd: IPC_RMID
+		buf: NULL
+		visszatérési érték: 0 vagy -1 (hiba)
+	void* shmat(int shmid, void* shmaddr, int shmflg): kapcsolódás
+		2. param: NULL
+		3. param: 0
+		visszatérési érték: -1 ha hiba, egyébként pointer memóriára
+	int shmdt(const void* shmaddr): lekapcsolódás
+		paraméter: shmat visszatérési értéke (memóriacím) (NEM pedig az id)
+		visszatérési érték: 0 vagy -1 (hiba)
+		nem történik semmi baj, ha nem csinálom meg
+
+Szemaforok (IPC, System V):
+	kritikus szakasz: amikor a folyamat közösen használt erőforrást manipulál
+	szemafor készletek vannak: egy azonosító alatt több szemafor
+		készlet helyett lehetne használni egyelemű "készleteket" is, csak kényelmetlen és kevésbé hatékony
+	System V IPC-s shell parancsok használhatók -s/-S kapcsolóval
+		ipcs: listázás
+		ipcrm -s <azon>: törlés
+		ipcmk -S <elemszám>: létrehozás
+	int semget(key_t key, int nsems, int semflg): létrehozás/csatlakozás
+		kulcs: mint eddig (ftok-kal generált kulcs vagy IPC_PRIVATE automatikus generáláshoz)
+		szemaforok száma: meglévő esetén 0 (bármi), létrehozáskor ahány szemafort szeretnénk (min. 1)
+		flag: meglévő esetén 0, létrehozáshoz IPC_CREAT | <hozzáférési jogok>
+		visszatérési érték: azonosító vagy -1 (hiba)
+	int semctl(int semid, int semnum, int cmd, ...): szemafor készlet vezérlése
+		"..." lehet üres vagy <érték>
+		semid: szemafor készlet (azonosító)
+		semnum: készleten belüli sorszám
+		parancsok:
+			IPC_RMID: szemafor készlet törlése (semnum nem számít)
+			SETVAL: értékadás (kell az <érték>), létrehozás után használjuk (inicializálás)
+			GETVAL: érték lekérdezés (nem volt erről szó gyakorlaton)
+		visszatérési érték: -1 ha hiba, egyébként 0 vagy valami speciális érték (parancstól függően)
+	int semop(int semid, struct sembuf* sops, size_t nsops): műveletek végrehajtása
+		tömbben található műveleteket sorban (!!!) végrehajtja
+			minden többelemű tömb hívás áttranszformálható egymás utáni egyelemű tömb hívásokká (csak kényelmetlen)
+		max 32 elemű lehet a tömb
+		visszatérési érték: 0 vagy -1 (hiba)
+		sembuf:
+			sem_num: készleten belül hányadik szemafor
+			sem_flg (short): alapból legyen 0
+				IPC_NOWAIT: ne várakozzunk műveletekkor, helyette legyen hiba
+				SEM_UNDO: folyamat terminálásakor a szemafor kerüljön visszavonásra
+			sem_op (short): művelet
+		művelet:
+			pozitív: növeli a szemafor értékét (soha nem várakozik)
+			0: addig vár, amíg 0 nem lesz a szemafor értéke (IPC_NOWAIT-tel nem kompatibilis)
+			negatív: vár, amíg nem levonható az (abszolút) érték (mert kevesebb a szemafor értéke, mint a művelet abszolút értéke)
+
+POSIX szemaforok:
+	szemaforok egyesével vannak, nem készletekben
+	fordításkor ez a kapcsoló kell: -pthread
+	int sem_init(sem_t* sem, int pshared, unsigned int value): névtelen létrehozása
+		sem: kimeneti paraméter
+		pshared: szálak közötti szemafor esetén 0, processz-ek közötti szemafor esetén 1 (nem0)
+		value: kezdeti érték
+		visszatérési érték: 0 vagy -1 (hiba)
+	int sem_destroy(sem_t* sem): névtelen törlése
+		visszatérési érték: 0 vagy -1 (hiba)
+	int sem_unlink(char* name): nevesített törlése
+		visszatérési érték: 0 vagy -1 (hiba)
+	sem_t* sem_open(char* name, int oflag, mode_t mode, unsigned int value): nevesített létrehozása
+		sem_open(név, mód, hozzáférési-engedélyek, kezdőérték)
+		név: pl. /cycss7 ('/' jellel kezdődik, utána pedig csak karakterek)
+		oflag: O_CREAT, stb.
+		mode: hozzáférési engedélyek, pl. 0666
+		value: kezdeti érték
+		visszatérési érték: szemafor mutató vagy SEM_FAILED (hiba)
+	sem_t* sem_open(char* name, int oflag): csatlakozás
+		oflag: 0
+		visszatérési érték: szemafor mutató vagy SEM_FAILED (hiba)
+	sem_t*: csak pointerként használjuk, nem használunk adattagokat
+	int sem_post(sem_t* sem): 1-gyel növelés
+		visszatérési érték: 0 vagy -1 (hiba, ilyenkor a szemafor nem változik)
+	int sem_wait(sem_t* sem): 1-gyel csökkentés; vár, ha a pillanatnyi érték 0
+		int sem_trywait(sem_t* sem): sem_wait, de hibával tér vissza várakozás helyett
+		int sem_timedwait(sem_t* sem, struct timespec* abs_timeout): sem_wait, de max X ideig vár
+		visszatérési érték: 0 vagy -1 (hiba, ilyenkor a szemafor nem változik)

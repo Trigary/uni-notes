@@ -1,0 +1,749 @@
+% !TeX spellcheck = hu_HU
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[magyar]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\usepackage{outlines}
+\usepackage{hyperref}
+
+\hyphenpenalty=10000
+
+\begin{document}
+
+\begin{center}
+	\huge
+	Diszkrét matematika II\\
+	\vspace{1mm}
+	\LARGE
+	Számelmélet témakör jegyzete\\
+	\vspace{5mm}
+	\large
+	Készült Burcsi Péter előadásai\\
+	és Harrison-Juhász Zsófia gyakorlatai alapján\\
+	\vspace{5mm}
+	Sárközi Gergő, 2021-22-1. félév\\
+	Nincsen lektorálva!
+\end{center}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Oszthatóság}
+
+\subsection{Definíció}
+
+\begin{outline}
+	\1 $a,b \in \mathbb{Z}: \exists c \in \mathbb{Z}: a*c=b \implies a|b$
+		\2 TODO nem kétirányú a reláció?
+	\1 elnevezés: a osztója b-nek, b többszöröse a-nak, a osztja b-t
+	\1 példa: $3|21$, $7|105$
+	\1 $0|0$
+\end{outline}
+
+\subsection{$\mathbb{Z}$-beli oszthatóság}
+
+\begin{outline}
+	\1 $\forall a: 1|a$
+	\1 $\forall a: a|a$ (reflexív)
+	\1 $\forall a: a|0$
+	\1 $\forall a: 0|a \implies a=0$
+	\1 $\forall a,b,k: a|b \implies a*k|b*k$
+	\1 $\forall a,b: a|b \wedge a'|b' \implies aa'|bb'$
+	\2 bizonyítás: $ak=b$ és $a'k'=b'$, tehát $aa'*kk'=bb'$
+	\1 $\forall a,b,k: k \ne 0 \wedge ak|bk \implies a|b$
+	\1 $\forall a,b,c: (a|b \wedge b|c) \implies a|c$ (tranzitív)
+\end{outline}
+
+\subsection{$\mathbb{N}$-beli oszthatóság}
+
+\begin{outline}
+	\1 minden igaz, amit felsoroltam $\mathbb{Z}$ alatt
+	\1 ha az alaphalmaz $\mathbb{N}$, akkor
+	$a,b \in \mathbb{N}: (a|b) \Leftrightarrow (\exists c \in \mathbb{N}: a*c=b)$
+		\2 TODO Ez $\mathbb{Z}$-ben is igaz, nem? lásd 1.4 lin komb bizonyítás
+	\1 $\forall a,b: (a|b \wedge b|a) \implies a=b$ (antiszimmetria)
+		\2 $\mathbb{Z}$-ben nem igaz: $7|-7$ és $-7|7$
+	\1 reflexív, antiszimmetrikus és tranzitív: tehát részbenrendezés $\mathbb{N}$-ben
+\end{outline}
+
+\pagebreak
+
+\subsection{Lineáris kombincáiós tulajdonság}
+
+\begin{outline}
+	\1 Legyen:
+		\2 $a\in \mathbb{Z}$
+		\2 $b_1, b_2, ..., b_n \in \mathbb{Z}$
+		\2 $\forall i: a|b_i$
+	\1 Akkor:
+		\2 $a| \sum_{i=1}^{n} x_i*b_i$ ($x_1,x_2, ..., x_n \in \mathbb{Z}$)
+	\1 Bizonyítás:
+		\2 $a|b_i \Leftrightarrow \exists k_i : a*k_i = b_i$
+		\2 $\sum_{i=1}^{n}x_i*b_i = \sum_{i=1}^{n}x_i*a*k_i = a * \sum_{i=1}^{n}x_i*k_i$
+	\1 Következmények:
+		\2 $a|b \wedge a|c \implies a|(k_1*b+k_2*c)$ ($k_i \in \mathbb{Z}$)
+\end{outline}
+
+\pagebreak
+
+\section{Legnagyobb közös osztó}
+
+\begin{outline}
+	\1 $a,b,d \in \mathbb{Z}$ ('d' 'a' és 'b' legnagyobb közös osztója, ha...)
+	\1 $d|a$ és $d|b$ (közös osztó)
+	\1 $\forall d' \in \mathbb{Z}: (d'|a \wedge d'|b) \implies d'|d)$ (legnagyobb = minden másik osztja)
+	\1 Példa: 18, 30-nak 6 és -6 is LNKO
+\end{outline}
+
+\subsection{LNKO létezésének bizonyítása}
+
+\begin{outline}
+	\1 Tétel: $a,b \in \mathbb{Z} \implies \exists d:LNKO \wedge \exists x,y \in \mathbb{Z}:
+ax+by=d$
+	\1 Bizonyítás:
+		\2 elég a,b > 0-ra belátni
+		\2 ha $0<b<a$ akkor \{a és b közös osztói\} = \{a-b és b közös osztói\}
+			\3 lineáris kombináció miatt igaz:
+			\3 $(d|a \wedge d|b) \implies d|a-b = 1*a-1*b$
+			\3 $(d|a-b \wedge d|b) \implies d|a = 1*(a-b)+1*b$
+		\2 lépés: (\{\} jelezze a rendezetlen párt, ne a halmazt)
+			\3 ha $a>b$ akkor $\{a,b\} \to \{a-b, b\}$
+			\3 ha $b \ge a$ akkor $\{a,b\} \to \{b-a, a\}$
+			\3 ez nem változtatja meg a közös osztókat
+		\2 előbb-utóbb 0-hoz és egy pozitív számhoz jutunk
+		\2 tehát létezik LNKO
+		\2 $\exists s,t: d=(a-b)*s+b*t \implies \exists x,y:d=a*x+b*y$
+			\3 megoldás: x=s, y=t-s
+\end{outline}
+
+\pagebreak
+
+\subsection{Bővített euklideszi algoritmus}
+
+\begin{outline}
+	\1 Bemenet: $a,b \in \mathbb{Z}^+$
+	\1 Kimenet: $d,x,y \in \mathbb{Z}$ (d az LNKO és $d=ax+by$)
+	
+\end{outline}
+
+\begin{verbatim}
+function extended_gcd(a, b)
+    (old_r, r) := (a, b)
+    (old_s, s) := (1, 0)
+    (old_t, t) := (0, 1)
+    while r != 0 do
+        quotient := old_r div r //egészrészes osztás
+        (old_r, r) := (r, old_r - quotient × r)
+        (old_s, s) := (s, old_s - quotient × s)
+        (old_t, t) := (t, old_t - quotient × t)
+    return (old_r, old_t, old_s) //t=x, s=y
+
+//Extra: normál, nem bővített euklideszi algoritmus
+function gcd(a, b)
+    while b != 0
+        t := b
+        b := a mod b
+        a := t
+    return a
+\end{verbatim}
+
+\begin{outline}
+	\1 d=LNKO: \{a és b közös osztói\} = \{d osztói\}
+		\2 mert minden lépésnél d osztja r-t és old-r-t
+	\1 lineáris kombinációs rész, indukció:
+		\2 (d osztja a-t és b-t, tehát a és b lineáris kombinációt is)
+		\2 eredeti old-r = a = a*old-s + b*old-t
+		\2 eredeti r = b = a*s + b*t
+		\2 következő r is lineáris kombináció lesz
+\end{outline}
+
+\pagebreak
+
+\subsection{Euklideszi algoritmus a gyakorlatban}
+
+$a = b * q_1 + r_1$ \\
+$b = r_1 * q_2 + r_2$ \\
+$r_1 = r_2 * q_3 + r_3$ \\
+$...$ \\
+Ha $r_i=0$, akkor $lnko(a,b)=r_{i-1}$ \\
+Ezt táblázatként a bővített algoritmus részeként láthatjuk.
+
+\subsection{Bővített euklideszi algoritmus a gyakorlatban}
+
+Kezdő értékek:\\
+$r_{-1} = a$, $r_0 = b$\\
+$x_{-1} = 1$, $x_0 = 0$\\
+$y_{-1} = 0$, $y_0 = 1$\\
+\\
+Minden $i \ge 1$ esetén:\\
+$q_i = \lfloor r_{i-2} / r_{i-1} \rfloor $\\
+$x_i = x_{i-2} - q_i * x_{i-1}$\\
+$y_i = y_{i-2} - q_i * y_{i-1}$\\
+$r_i = a*x_i + b*y_i$
+
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+	i & $q_i$ & $r_i$ & $x_i$ & $y_i$ \\
+	\hline
+	-1 & - & \textbf{a} & 1 & 0 \\
+	\hline
+	0 & - & \textbf{b} & 0 & 1 \\
+	\hline
+	... & ... & ... & ... & ... \\
+	\hline
+	i & $\lfloor r_{i-2}/r_{i-1} \rfloor$ & $r_{i-2} \mod r_{i-1}$ &
+	$x_{i-2}-q_i*x_{i-1}$ & ... \\
+	\hline
+	... & ... & ... & ... & ... \\
+	\hline
+	n-1 & ? & \textbf{lnko(a,b)} & \textbf{?} & \textbf{?} \\
+	\hline
+	n & ? & \textbf{0} & ... & ... \\
+	\hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+	i & $q_i$ & $r_i$ & $x_i$ & $y_i$ \\
+	\hline
+	-1 & - & \textbf{86} & 1 & 0 \\
+	\hline
+	0 & - & \textbf{31} & 0 & 1 \\
+	\hline
+	1 & 2 & 24 & 1 & -2 \\
+	\hline
+	2 & 1 & 7 & -1 & 3 \\
+	\hline
+	3 & 3 & 3 & 4 & -11 \\
+	\hline
+	4 & 2 & \textbf{1} & \textbf{-9} & \textbf{25} \\
+	\hline
+	5 & 3 & \textbf{0} & - & - \\
+	\hline
+\end{tabular}
+\end{table}
+
+\pagebreak
+
+\section{Prímszámok}
+
+\subsection{Prím vs felbonthatatlan}
+
+\begin{outline}
+	\1 $f \in \mathbb{Z}$ felbonthatatlan (irreducibilis), ha $f \ne 0$, $f \ne \pm 1$
+	és $f$-nek a $\pm 1$ és $\pm f$-en (triviális osztókon) kívül nincs más osztója
+			\2 $f=a*b \implies (a = \pm 1) \lor (b = \pm 1)$
+	\1 $p \in \mathbb{Z}$ primszám (rendelkezik a prímtulajdonsággal),\\
+	ha $p \ne 0$ és $p \ne \pm 1$ és $\forall a,b \in \mathbb{Z}: p|a*b \implies p|a \lor p|b$
+		\2 nem prím példa: $15|3*5$, de $15 \not | 3$ és $15 \not | 5$
+\end{outline}
+
+\subsection{Felbonthatatlan = prím}
+
+\begin{outline}
+	\1 Cél: felbonthatatlanság $\Leftrightarrow$ prímtulajdonság
+	\1 Bizonyítás: p prím $\implies$ p felbonthatatlan
+		\2 Indirekt, Tfh. (tegyük fel hogy) $p=a*b$ ($a \ne \pm 1$, $a \ne \pm p$)
+		\2 $p|a*b \implies \text{(mert prím) } p|a \lor p|b$
+		\2 $p=a*b \implies a|p \wedge b|p$
+		\2 $p|a \wedge a|p \implies p=\pm a$ ($a$ helyett $b$-re ugyan ezek felírhatók)
+		\2 ellentmondás
+	\1 Bizonyítás: f felbonthatatlan $\implies$ f prím
+		\2 f-nek 4 osztója van: $\pm 1, \pm f$
+		\2 kérdés, hogy igaz-e: $f|a*b \implies f|a \lor f|b$
+		\2 ha $f|a*b$, de $f\not | a$:
+			\3 f és a közös osztói: $\pm 1$ (egyben LNKO)
+			\3 LNKO = 1 = $x*f+y*a$ (lásd LNKO szekció)
+			\3 /*b után: $b = b*x*f + b*y*a$
+			\3 $f$ osztja az első tagot: $f|b*x*f$
+			\3 $f|a*b$ (kikötés), tehát f osztja a második tagot: $f|a*y*b$
+			\3 tehát $f$ osztja $b$-t is, hiszen $b$ felírható
+			olyan számok lineáris kombinációjaként, amiket $f$ oszt
+\end{outline}
+
+\pagebreak
+
+\subsection{Számelmélet alaptétele}
+
+\begin{outline}
+	\1 Legyen $n \in \mathbb{Z}, n \ne 0, n \ne \pm 1$. Ekkor $n$ lényegében
+	(előjeltől és sorrendtől eltekintve) felirható prímszámok szorzataként.
+	\1 Bizonyítás: létezik felírás
+		\2 Elég $n \ge 2$ esetben
+		\2 Indukció: $n=2$
+		\2 Legyen $n>2$. Minden n-nél kisebbhez létezik felírás
+		\2 Ha n prím, akkor kész vagyunk
+		\2 Ha n nem prím, akkor $\exists 1<n_1,n_2<n: n=n_1*n_2$
+			\3 De ekkor n felírható $n_1$ és $n_2$ szorzataként, szóval van felírás
+	\1 Bizonyítás: egyértelműség
+		\2 Tfh. $n=p_1*p_2*...*p_r=q_1*q_2*...*q_s$ ($p_i$ és $q_i$ prímek)
+		\2 $p_1$ prím és $p_1 | q_1*q_2*...*q_s$ ezért $\exists l$ index, hogy $p_1|q_l$
+			\3 de $q_l$ prím, azaz osztói: $\{\pm 1, \pm q\}$
+			\3 $p_1$ nem lehet $\pm 1$, mert prím
+			\3 tehát $p_1 = \pm q_l$
+		\2 Folytatva: $\frac{n}{p_1}=p_2*...*p_r=\pm q_1*...*q_{l-1}*q_{l+1}*...*q_s=\pm\frac{n}{q_l}$
+		\2 Azaz kisebb számmal folytatjuk, így előbb-utóbb végzünk és arra jutunk,
+		hogy a két szorzat pontosan ugyanazokat a tényezőket tartalmazza
+		(sorrendtől és előjeltől eltekintve)
+\end{outline}
+
+\subsection{Tétel: végtelen sok prím van}
+
+\begin{outline}
+	\1 Tfh. összesen $n$ prím van: $p_1,p_2,...,p_n$
+	\1 $x=p_1*p_2*...*p_n+1$
+	\1 $x$ felbontható prímekre, hiszen minden szám felbontható prímekre
+	\1 $x-1$ osztható az összes prímmel, tehát $x$ nem osztható egyikkel sem (ellentmondás)
+\end{outline}
+
+\pagebreak
+
+\subsection{Prímszámtétel}
+
+\begin{outline}
+	\1 $\lim\limits_{x\to\infty} \frac{\pi(x)}{x/ln(x)}=1$, ahol $\pi(x)=1\le p < x$ prímek száma
+	\1 Jelentés: prímek száma nagyjából $\frac{x}{ln(x)}$
+	\1 Random szám x körül: $1/ln(x)$ eséllyel prím
+		\2 $ln(x)$ arányos $x$ számjegyeinek számával
+\end{outline}
+
+\subsection{Prímfelbontás kanonikus alakja}
+
+\begin{outline}
+	\1 Prímfelbontás kanonikus alakja: $n=p_1^{\alpha_1}*p_2^{\alpha_2}*...$ (ahol $p_i$ különböző)
+	\1 n osztói pontosan azok az $m=p_1^{\beta_1}*p_2^{\beta_2}*...$
+	számok ahol $\forall i: 0 \le \beta_i \le \alpha_i$
+	\1 Bizonyítás:
+		\2 $m$-nek lenne más prímosztója $q$
+		\2 $q|m \wedge m|n \implies q|n \implies$ q n egy tényezője, ellentmondás
+\end{outline}
+
+\subsection{Szám osztóinak száma}
+
+\begin{outline}
+	\1 $n=p_1^{\alpha_1}*p_2^{\alpha_2}*...$ szám pozitív osztóinak száma:
+	$(\alpha_1+1)*(\alpha_2+1)*...$
+	\1 mert $\beta_i$-re ennyi lehetőség van
+\end{outline}
+
+\subsection{LNKO kiszámítása prímtényezőkből}
+
+\begin{outline}
+	\1 $n=p_1^{\alpha_1}*p_2^{\alpha_2}*...$ és $m=p_1^{\beta_1}*p_2^{\beta_2}*...$
+	és $\alpha_i=0$, $\beta_i=0$ is meg van engedve
+	\1 $LNKO(n,m)=p_1^{min(\alpha_1,\beta_1)}*p_2^{min(\alpha_2,\beta_2)}*...$
+\end{outline}
+
+\pagebreak
+
+\section{Legkisebb közös többszörös}
+
+\subsection{Definíció}
+
+\begin{outline}
+	\1 Legyen $n,m \in \mathbb{Z}$ és $t=LKKT(n,m) \in \mathbb{Z}$
+	\1 Ekkor $n|t \wedge m|t$ és $\forall t': (n|t' \wedge m|t') \implies t|t'$
+	\1 Kettő LKKT van, normáls esetben a pozitívra gondolunk
+\end{outline}
+
+\subsection{Kiszámítása}
+
+\begin{outline}
+	\1 Ha $n=p_1^{\alpha_1}*p_2^{\alpha_2}*...$ és $m=p_1^{\beta_1}*p_2^{\beta_2}*...$
+	\1 Ekkor $LKKT(n,m) = p_1^{max(\alpha_1,\beta_1)}*p_2^{max(\alpha_2,\beta_2)}*...$
+\end{outline}
+
+\subsection{LNKO, LKKT kapcsolata}
+
+\begin{outline}
+	\1 $LNKO(a,b)*LKKT(a,b)=a*b$
+	\1 Tehát LKKT-t ki lehet számítani a két szám szorzatából és LNKO-ból
+\end{outline}
+
+\pagebreak
+
+\section{Kongruencia}
+
+\subsection{Definíció}
+
+\begin{outline}
+	\1 $m,a,b \in \mathbb{Z}$ esetén $a \equiv b \pmod m \Leftrightarrow m|a-b$
+	\1 Másik jelölés: $a \equiv b$ (m)
+\end{outline}
+
+\subsection{Tulajdonságok}
+
+\begin{outline}
+	\1 reflexív: $\forall a: a \equiv a \pmod m$
+	\1 szimmetrikus: $\forall a,b: a \equiv b \pmod m \Leftrightarrow b \equiv a \pmod m$
+		\2 $m|a-b \Leftrightarrow m|b-a$ (mindkettő lineáris kombináció)
+	\1 tranzitív: $\forall a,b,c: a \equiv b \pmod m \wedge b \equiv c \pmod m$\\
+	$\implies a \equiv c \pmod m$
+		\2 $m|a-b \wedge m|b-c \implies m|a-c$ (mert $a-c=(a-b)+(b-c)$)
+	\1 reflexív, szimmetrikus, tranzitív: ekvivalencia reláció
+		\2 mod m szerinti osztályok: m szerinti (modulo m) maradékosztályok
+\end{outline}
+
+\pagebreak
+
+\subsection{Modulus tulajdonságai, gyakorlatról trükkök}
+
+\begin{outline}
+\1 $a+b \mod m = (a \mod m + b \mod m) \mod m$
+\1 $a*b \mod m = (a \mod m) * (b \mod m) \mod m$
+\1 $a^x \mod m = (a \mod m)^x \mod m$
+\1 Kis-fermat tétel: $a^p \mod p = a^1 \mod p$ \;\; (ahol $p$ prím)
+\2 Átfogalmazva: $a^{p-1} \mod p = 1$
+\2 Következmény: $a^x \mod p = a^{(x \mod (p-1))} \mod p$
+\end{outline}
+
+\subsubsection{Ekvivalens átalakítás}
+
+\begin{outline}
+	\1 Legyen a kongruencia $a \equiv b \mod m$
+	\1 $c \ne 0$-val szorozni $a$-t, $b$-t és $m$-t
+	\1 Legyen $c \ne 0$ és $gcd(m,c)=1$, ekkor $a$, $b$ beszorozható $c$-vel ($m$ marad) 
+	\1 Legyen $c \ne 0$, hogy $c | a$ és $c | b$, ekkor $a$ és $b$ leosztható $c$-vel, $m$ pedig leosztható $gcd(m,c)$-vel
+\end{outline}
+
+\subsubsection{Gyorshatványozás}
+
+($n^x \mod m$):  az $x$ szám felírása 2-es számrendszerben
+és $n^{(2^k)} \mod m$ értékekhez táblazatot készíteni ($k \in \mathbb{N}_0$).
+Itt a következő érték mindig az előző érték négyzete, mod m.
+Ekkor az $n$ kettő hatványokra emelt mod m értékeiből összerakni az $n^x$ értéket:
+$n^x \mod m = (\prod n^{(2^k)} \mod m) \mod m$
+
+\paragraph{Példa} Legyen a feladat $2019^{10} \mod 7$ \\
+$10$ a kettes számrendszerben: $1010$ \\
+Tehát $2019^{10} = 2019^{2^3}*2019^{2^1}$ \\
+Tudjuk, hogy $2019^{10} \mod 7 = (2019^{2^3} \mod 7)*(2019^{2^1} \mod 7)$ \\
+A táblázatban számoljuk ki $2019^{(2^k)} \mod 7$ értékeket \\
+Tudjuk, hogy $2019^{(2^k)} \mod 7 = (2019 \mod 7)^{(2^k)} \mod 7$ \\
+Tudjuk, hogy $2019^{(2^{k+1})} \mod 7 = (2019^{(2^k)} \mod 7)^2 \mod 7$ \\
+Táblázatból kiolvasva: $2019^{10} \mod 7 = (2*2) \mod 7$
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|c|}
+	\hline
+	k & 0 & 1 & 2 & 3 \\
+	\hline
+	$2019^{(2^k)} \mod 7$ & 3 & 2 & 4 & 2 \\
+	\hline
+\end{tabular}
+\end{table}
+
+\pagebreak
+
+\subsection{Kínai maradéktétel}
+
+\subsubsection{Állítás}
+
+\begin{outline}
+	\1 Legyen $m_1,m_2,...,m_n$ tetszőleges 1-nél nagyobb egészek, melyek páronként relatív prímek
+		\2 páronként relatív prím: $i \ne j \implies LNKO(m_i,m_j)=1$
+	\1 Ekkor
+		\2 az alábbi szimultán kongruenciarendszer megoldható minden $a_1,a_2,...,a_n$ egészek esetén
+		\2 az $x$-ek maradékosztályt alkotnak modulo $M=m_1*m_2*...*m_n$
+	\1 $x \equiv a_1 \mod m_1$\\
+	$x \equiv a_2 \mod m_2$\\
+	...\\
+	$x \equiv a_n \mod m_n$
+\end{outline}
+
+\subsubsection{Bizonyítás}
+
+\begin{outline}
+	\1 Legyen $n=2$ (ha nagyobb, akkor indukcióval megoldható)
+	\1 $LNKO(m_1,m_2)=1=m_1*x_1+m_2*x_2$
+	\1 $A=a_2*m_1*x_1+a_1*m_2*x_2$
+		\2 $A \equiv 0+a_1*m_2*x_2 \mod m_1$
+		\2 $1=m_1*x_1+m_2*x_2 \implies 1 \equiv m_1*x_1+m_2*x_2 \mod $bármi
+		\2 $1 \equiv m_1*x_1+m_2*x_2 \equiv m_2*x_2 \mod m_1$
+		\2 $A \equiv a_1*m_2*x_2 \equiv a_1 \mod m_1$
+	\1 $A \equiv a_1 \mod m_1$ és $A \equiv a_2 \mod m_2$
+	\1 Ezért $x \equiv A \mod m_1*m_2$
+	\1 Be kell látni: $A$ és $A'$ is jó $\implies A \equiv A' \mod m_1*m_2$
+		\2 $A' \equiv A \equiv a_1 \mod m_1 \implies m_1 | A-A'$
+		\2 $A' \equiv A \equiv a_2 \mod m_2 \implies m_2 | A-A'$
+		\2 Ezekből következik: $m_1*m_2|A-A'$ ($m_1$, $m_2$ relatív prímek)
+\end{outline}
+
+\pagebreak
+
+\subsection{Euler-Fermat tétel}
+
+\subsubsection{Bevezetés}
+
+\begin{outline}
+	\1 $ax \equiv ax' \mod m$ és $(a,m)=1$ akkor $x \equiv x' \mod m$
+		\2 Bizonyítás: $ax \equiv ax' \mod m$
+		\2 $\Leftrightarrow m | ax-ax'=a(x-x')$
+		\2 $\implies$ (mert $(a,m)=1$) $\implies m|(x-x')$
+		\2 $\Leftrightarrow x \equiv x' \mod m$
+	\1 Általánosabban: $ax \equiv ax' \mod m \implies x \equiv x' \mod \frac{m}{(a,m)}$
+\end{outline}
+
+\subsubsection{Euler-féle $\varphi$ függvény}
+
+\begin{outline}
+	\1 $\varphi(m)=|\{x=1,...,m \;|\; (x,m)=1\}|$
+		\2 azaz $1$ és $m$ közötti, $m$-mel relatív prím számok száma
+	\1 Példa: $\varphi(10)=4$, mert: 1,3,7,9
+\end{outline}
+
+\subsubsection{Euler-Fermat tétel}
+
+\begin{outline}
+	\1 $(a,m)=1 \implies a^{\varphi(m)} \equiv 1 \mod m$
+		\2 Máshogy: $a^x \equiv a^{x \mod \varphi(m)} \mod m$
+	\1 Bizonyítás:
+		\2 Legyen $a_1, a_2, ..., a_{\varphi(m)}$ mindegyike egy különböző szám\\
+		$\{0,1,...,\varphi(m)-1\}$-ből (melyek relatív prímek m-hez)
+		\2 $a*a_1, a*a_2, ..., a*a_{\varphi(m)}$ páronként különböznek mod m
+			\3 $a*a_i \equiv a*a_j \implies a_i \equiv a_j \implies$ ellentmondás
+		\2 tehát a $a_1,...,a_{\varphi(m)}$ és a $a*a_1,...,a*a_{\varphi(m)}$ maradékosztályok
+		ugyan azok, legfeljebb más sorrendben
+			\3 redukált maradékrendszerek, ezeket viszont nem vettük
+		\2 $\implies a_1*...*a_{\varphi(m)} \equiv (a*a_1)*...*(a*a_{\varphi(m)}) \mod m$
+		\2 $\implies a_1*...*a_{\varphi(m)} \equiv a^{\varphi(m)} * (a_1*...*a_{\varphi(m)}) \mod m$
+		\2 $\implies 1 \equiv a^{\varphi(m)} \mod m$
+	\1 Példa: $7^4 \equiv 1 \mod 10$
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Euler-féle $\varphi$ függvény kiszámítása}
+
+\begin{outline}
+	\1 Állítás:
+		\2 Legyen $m=p^\alpha$ valami $p$ prímre, $\alpha \ge 1$
+		\2 Akkor $\varphi(m) = p^\alpha - p^{\alpha-1} = (p-1)*p^{\alpha-1} = \frac{p-1}{p}*m$
+		\2 Példa: $\varphi(125)=\varphi(5^3)=5^3-5^2=100$
+	\1 Bizonyítás:
+		\2 $LNKO(p^\alpha,a)=1 \Leftrightarrow p \not | a$
+		\2 $\varphi(p^\alpha)=|\{a=1,...,p^\alpha \;|\; p \not | a\}|=p^\alpha - p^{\alpha-1}$
+			\3 Mert $p$-vel $p^{\alpha-1}$ pozitív szám osztható (ami $\le p^\alpha$)
+			\3 Más megközelítés: minden $p$-edik szám kiesik, azaz $p^{\alpha-1}$ darab
+	\1 Állítás: $\varphi$ multiplikatív
+		\2 Legyen $a,b$ relatív prímek
+		\2 $\varphi(a*b)=\varphi(a)*\varphi(b)$
+	\1 Bizonyítás:
+		\2 $x \equiv a_1 \mod a$ és $x' \equiv a_1 \mod a$ esetén: $lnko(x,a)=lnko(x',a)$
+		\2 Tehát $x$ relatív prím $a*b \Leftrightarrow$ $x$ relatív prím $a$ és $b$
+		\2 Ez kell: $x \equiv a_1 \mod a$ és $x \equiv b_1 \mod b$
+			\3 ahol $lnko(a,a_1)=1$ és $lnko(b,b_1)=1$
+		\2 $a_1$-ből $\varphi(a)$ db van, stb.
+		\2 Kínai maradéktétel miatt biztos van megoldás
+	\1 Következmény:
+		\2 Ha $n=p_1^{\alpha_1}*p_2^{\alpha_2}*...*p_r^{\alpha_r}$ (kanonikus alak)
+		\2 Akkor $\varphi(n)=\Pi_{k=1..r}(p^{\alpha_k}-p^{\alpha_k-1})=n*\Pi_{k=1..r}(1-\frac{1}{p_k})$
+		\2 Példa: $\varphi(100=2^2*5^2)=(2^2-2^1)(5^2-5^1)=2*20=40$
+\end{outline}
+
+\pagebreak
+
+\subsection{Egyváltozós lineáris kongruenciák}
+
+\begin{outline}
+	\1 $a*x \equiv b \mod m$ ahol $a,b,m$ adott
+	\1 ha $x$ megoldás, akkor minden $x' \equiv x \mod m$ is
+\end{outline}
+
+\subsubsection{Megoldási módszer}
+
+\begin{outline}
+	\1 $ax \equiv b \mod m$
+	\1 Átírva: $\exists y \in \mathbb{Z}: ax-b=my$, azaz $ax+my=b$
+	\1 LNKO(a,m) kiszámítása: $as+mt=d=(a,m)$
+	\1 $(a,m) \not |\; b \implies$ nincs megoldás
+	\1 $(a,m) \;\;|\; b \implies x \equiv s*\frac{b}{(a,m)} \mod \frac{m}{(a,m)}$
+		\2 $(\frac{a}{(a,m)},\frac{m}{(a,m)})=1=\frac{a}{d}*s+ \frac{m}{d}*t$
+		\2 $\implies \frac{a}{(a,m)}*s=1-\frac{m}{(a,m)}*t$
+		\2 $\implies \frac{a}{(a,m)}*s=1-\frac{m}{(a,m)}*t \equiv 1 \mod \frac{m}{(a,m)}$
+		\2 $\implies \frac{a}{(a,m)}*(s*\frac{b}{(a,m)}) \equiv \frac{b}{(a,m)} \mod \frac{m}{(a,m)}$
+	\1 $x'$ megoldás $\Leftrightarrow x \equiv x' \mod \frac{m}{(a,m)}$
+\end{outline}
+
+\subsubsection{Megoldás diofantikus egyenlet alapján}
+
+\begin{outline}
+	\1 $ax \equiv b \mod m \Leftrightarrow \exists y \in \mathbb{Z}: ax+my=b$
+	\1 megoldjuk a diofantikus egyenletet
+	\1 $x_t = x_0 + \frac{m}{(a,m)}t$\;\; ($t=0,1,...,(a,m)-1$)
+	\1 megoldások: $[x_0] \cup [x_1] \cup ... \cup [x_{(a,m)-1}]$
+		\2 $\{x_0 + mk \;|\; k \in \mathbb{Z}\} \cup \{x_1 + mk \;|\; k \in \mathbb{Z}\} \cup ...$
+		\2 $[x]=\{x' \in \mathbb{Z} \;|\; x' \equiv x \mod m\}$
+	\1 egyszerűsítés: ha megoldható, akkor ekvivalens: $\frac{ax}{(a,m)} \equiv \frac{b}{(a,m)} \mod \frac{m}{(a,m)}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Lineáris kongruencia rendszerek}
+
+\subsubsection{Kínai maradéktétellel, páronként relatív prímek esetén}
+
+\begin{outline}
+	\1 Legyen $i$ kongruenciánk: $x \equiv c_i \mod m_i$
+	\1 $m_i$ páronként relatív prímek
+	\1 $i-1$ lépésben oldjuk meg: mindig 2 kongruenciából csinálunk 1 újat
+		\2 Legyen ez a kettő kongruencia $i=1$ és $i=2$
+		\2 $x \equiv c_2*m_1*x_1 + c_1*m_2*x_2 \mod m_1*m_2$
+		\2 Ahol $x_1$ és $x_2$ innen jön: $m_1*x_1+m_2*x_2=1$ (mindig megoldható)
+	\2 Végül egyetlen kongruencia marad: $x \equiv \;? \mod \prod m_i$
+\end{outline}
+
+\subsubsection{Kínai maradéktétellel, nem relatív prímek esetén}
+
+\begin{outline}
+	\1 Legyen $i$ kongruenciánk: $x \equiv c_i \mod m_i$
+	\1 Ha bármelyik $m_j$ és $m_k$ nem relatív prímek, akkor bontsuk őket szét 2 vagy több kongruenciára, hogy azok legyenek, vagy egymás hatványai.
+		\2 Példa: $x \equiv 4 \mod 15$ és $x \equiv 4 \mod 10$
+		\2 Elsőből: $x \equiv 4 \mod 5$ és $x \equiv 4 \equiv 1 \mod 3$
+	\1 Ezek után ha bármelyik $m_j | m_k$ (pl. $2|2$ vagy $2|4$)
+		\2 vagy ellentmondanak egymásnak és nincs megoldás
+		\2 vagy nem mondanak ellen egymásnak, $m_j$ eldobható
+	\1 Ezek után relatív prímek $m_i$-k és megoldhatók a fenti módszerrel
+\end{outline}
+
+\subsubsection{Behelyetessítős módszerrel}
+
+\begin{outline}
+	\1 Legyen $i$ kongruenciánk: $a_i*x \equiv c_i \mod m_i$
+	\1 $i-1$ lépésben oldjuk meg: mindig 2 kongruenciából csinálunk 1 újat
+		\2 Legyen ez a kettő kongruencia $i=1$ és $i=2$
+		\2 Elsőből kifejezzük $x$-et: $x \equiv y \mod m$ (ahol $y$ és $m$ ismert)
+		\2 Felírjuk egyenletként: $x = y + k*m \;\; (k \in \mathbb{Z})$
+		\2 Behelyettesítjük másodikba: $a_2 * (y + k*m) \equiv c_2 \mod m_2 \; (k \in \mathbb{Z})$
+		\2 Megoldjuk $k$-ra: $k \equiv ? \mod ?$
+	\1 Végül egyetlen kongruencia marad: $x \equiv ? \mod ?$
+\end{outline}
+
+\pagebreak
+
+\section{Kétváltozós lineáris diofantikus egyenletek}
+
+\begin{outline}
+	\1 $ax+by=c$ ahol $a,b,c,x,y \in \mathbb{Z}$ és $x,y=?$
+	\1 $(a,b)|c \Leftrightarrow$ megoldható
+	\1 Bővített euklideszi algoritmus: $ap+bq=(a,b)$
+		\2 megszorozva $\frac{c}{(a,b)}$-vel:
+		\2 $x_0=p*\frac{c}{(a,b)}$
+		\2 $y_0=q*\frac{c}{(a,b)}$
+		\2 $ax_0+by_0=c$
+	\1 $ax_t+by_t=c$
+		\2 $x_t=x_0+\frac{b}{(a,b)}t$
+		\2 $y_t=y_0-\frac{a}{(a,b)}t$
+	\1 Ha csak pozitív megoldások érdekelnek:\\
+	$x_t>0 \wedge y_t>0$ egyenletrendszert meg kell oldani
+\end{outline}
+
+\pagebreak
+
+\section{Számrendszerek}
+
+\subsection{Gyakorlati trükkök}
+
+\begin{outline}
+	\1 Számrendszer váltás: a számot folyamatosan leosztjuk az új bázissal. A maradékot feljegyezzük.
+	Ha nullához értünk, akkor végeztünk: a maradékot fordított sorrendben
+	(utoljára feljegyzett van a legtöbbet érő helyiértéken) kiolvassuk.
+\end{outline}
+
+\pagebreak
+
+\section{ZH 1-re összefoglaló jegyzet}
+
+\subsection{Kanonikus alak}
+
+\begin{outline}
+	\1 Legyen $n = p_1^{a_1} * p_2^{a_2} * ...$ és $m = p_1^{b_1} * p_2^{b_2} * ...$
+	\1 $n$ osztóinak száma: $(a_1+1)*(a_2+1)*...$
+	\1 $\varphi(p^a) = p^a - p^{a-1}$ és $\varphi(x*y) = \varphi(x)*\varphi(y)$
+	\1 $LNKO(n,m) = gcd(n,m) = (n,m) = p_1^{min(a_1,b_1)} * p_2^{min(a_2,b_2)} * ...$
+	\1 $LKKT(n,m) = lcm(n,m) = [n,m] = p_1^{max(a_1,b_1)} * p_2^{max(a_2,b_2)} * ...$
+	\1 LNKO, LKKT összefüggés: $n*m = (n,m) * [n,m]$
+\end{outline}
+
+\subsection{Oszthatóság}
+
+\begin{outline}
+	\1 $a,b \in \mathbb{Z}: \exists c \in \mathbb{Z}: a*c=b \implies a|b$
+	\1 $\forall a: 1|a \; \wedge \; a|0$ \;\; viszont $0|a \implies a=0$
+	\1 $a|b \wedge a|c \implies a|(k_1*b+k_2*c)$ \;\; (lineáris kombinációs tulajdonság)
+	\1 $\mathbb{N}$-ben részbenrendezés: reflexív, tranzitív és antiszimmetrikus
+		\2 $\mathbb{Z}$-ben nem antiszimmetrikus: $7|-7$ és $-7|7$
+	\1 Bővített euklideszi algoritmus: $gcd(a,b)=a*x+b*y$ \;\;(q,r,x,y táblázat)
+\end{outline}
+
+\subsection{Kongruencia}
+
+\begin{outline}
+	\1 $m,a,b \in \mathbb{Z}: a \equiv b \mod m \; \Leftrightarrow \; m | a-b$
+	\1 Ekvivalencia reláció: reflexív, szimmetrikus, tranzitív
+	\1 $a*+b \equiv a \mod m *+ b \mod m$ és $a^x \equiv (a \mod m)^x \;\;(mod \; m)$
+\end{outline}
+
+\subsection{Kis-Fermat tétel, Euler-Fermat tétel}
+
+\begin{outline}
+	\1 Kis-Fermat tétel: $p$ prím $\implies a^{p-1} \equiv 1 \mod p$
+	\1 Euler-Fermat tétel: $(a,m)=1 \implies a^{\varphi(m)} \equiv 1 \mod m$
+\end{outline}
+
+\pagebreak
+
+\subsection{Kongruencia ekvivalens átalakításai}
+
+\begin{outline}
+	\1 $a \equiv b \mod m$
+	\1 $c \ne 0$: $ac \equiv bc \mod mc$
+	\1 $gcd(m,c)=1$ és $c \ne 0$: $ac \equiv bc \mod m$
+	\1 $c \ne 0$ és $c|a$ és $c|b$: $\frac{a}{c} \equiv \frac{b}{c} \mod \frac{m}{(m,c)}$
+\end{outline}
+
+\subsection{Kétváltozós lineáris diofantikus egyenletek}
+
+\begin{outline}
+	\1 $ax+by=c$ ahol $x,y$ ismeretlen
+	\1 $(a,b)|c \Leftrightarrow$ megoldható
+		\2 Bővített euklideszi algoritmus: $ap+bq=(a,b)$
+		\2 $a*(p*\frac{c}{(a,b)}) + b*(q*\frac{c}{(a,b)}) = c = a*x_0 + b*y_0$
+		\2 $x_t = x_0 + \frac{b}{(a,b)}t$ \;\; és \;\; $y_t = y_0 - \frac{a}{(a,b)}t$
+	\1 Kongruenciából: $ax \equiv n \mod m \implies \exists y: ax + my = n$
+		\2 Megoldás: $[x_0] \cup [x_1] \cup ...$ ahol $0 \le t < (a,m)$
+		\2 Egyszerűsítés: $\frac{a}{(a,m)}x \equiv \frac{b}{(a,m)} \mod \frac{m}{(a,m)}$
+		\;\; (ekkor csak $t=0$)
+\end{outline}
+
+\subsection{Kongruenciarendszerek, kínai maradéktétel}
+
+\begin{outline}
+	\1 Legyen $i$ db kongruenciánk: $x \equiv c_i \mod m_i$
+	\1 Ha $m_i$ páronként relatív prímek: megoldható, kettesével
+		\2 $x \equiv c_2*m_1*x_1 + c_1*m_2*x_2 \mod m_1*m_2$
+		\2 Ahol $x_1$ és $x_2$ innen jön: $m_1*x_1+m_2*x_2=1$ (mindig megoldható)
+	\1 Egyébként bontsuk kanonikus formára az $m_i$-ket:
+	vagy ellentmondás lesz vagy elhagyható $m_1$ ha $m_1|m_2$ (pl. $2|4$).
+\end{outline}
+
+\subsection{Trükkök}
+
+\begin{outline}
+	\1 Gyorshatványozás: $a^{12}=a^8*a^4$ és $a^8 \equiv (a^4 \mod m)^2 \mod m$\\
+	Azaz mindig csak az előző eredményt kell négyzetre emelni.
+	\1 $(a,m)=1 \implies$ $a^{b^c} \equiv a^n \mod m$ és $n \equiv b^c \mod \varphi(m)$
+\end{outline}
+
+\end{document}
