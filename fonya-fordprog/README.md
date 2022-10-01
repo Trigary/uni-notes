@@ -5,5 +5,5 @@
 A jegyzet témakörönként külön-külön fájlra van bontva.
 
 Linkek:
- - [Fordítóprogramok jegyzet link](fordítóprogramok/fonyfordprog-fordítóprogramok.pdf)
- - [Formális nyelvek jegyzet link](formális-nyelvek/fonyfordprog-formális-nyelvek.pdf)
+ - [Fordítóprogramok jegyzet link](fordítóprogramok/fonyafordprog-fordítóprogramok.pdf)
+ - [Formális nyelvek jegyzet link](formális-nyelvek/fonyafordprog-formális-nyelvek.pdf)

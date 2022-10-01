@@ -4,4 +4,4 @@
 
 Csak a gyakorlathoz kapcsolódó részekről szól a jegyzet. A vizsgára nem, viszont a gyakorlati ZH-kra a felkészülést segíti.
 
-[Jegyzet link](nummód2-gyak.pdf)
+[Jegyzet link](nummód1-gyak.pdf)
