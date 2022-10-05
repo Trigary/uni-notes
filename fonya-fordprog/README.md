@@ -5,5 +5,5 @@
 A jegyzet témakörönként külön-külön fájlra van bontva.
 
 Linkek:
- - [Fordítóprogramok jegyzet link](fordítóprogramok/fonyafordprog-fordítóprogramok.pdf)
- - [Formális nyelvek jegyzet link](formális-nyelvek/fonyafordprog-formális-nyelvek.pdf)
+ - [Fordítóprogramok jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/fonya-fordprog/ford%C3%ADt%C3%B3programok/fonyafordprog-ford%C3%ADt%C3%B3programok.pdf)
+ - [Formális nyelvek jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/fonya-fordprog/form%C3%A1lis-nyelvek/fonyafordprog-form%C3%A1lis-nyelvek.pdf)

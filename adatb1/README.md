@@ -4,4 +4,4 @@
 
 A gyakorlat-specifikus része a jegyzetnek a legvégén található.
 
-[Jegyzet link](adatb1.pdf)
+[Jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/adatb1/adatb1.pdf)

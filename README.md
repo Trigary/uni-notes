@@ -4,7 +4,8 @@ Ebben a repository-ban megtalálhatóak a jobban sikerült egyetemi jegyzeteim, 
 
 Ezek a jegyzetek nincsenek lektorálva, valószínűleg vannak bennük hibák. Amióta készültek, könnyen lehet, hogy a tananyag is megváltozott.
 
-Ebben a README-ben található egy link minden jegyzethez. A fájlok között navigálva is megtalálhatóak, de ez a README egy kicsit jobban rendszerezi őket.
+Ebben a README-ben található egy link minden jegyzethez. Bár a fájlok között navigálva is megtalálhatóak a jegyzetek, linkek használatával
+a GitHub nem túl kényelmes PDF nézegetője helyett a böngésző beépített PDF nézegetője fog aktiválódni, amivel (pl. Chromium-ban) minden funkció letöltés nélkül elérhető.
 
 ## ELTE IK Proginf BSc, Szoftvertervező (B) szakirány (kezdés éve: 2020)
 

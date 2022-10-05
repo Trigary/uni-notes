@@ -5,5 +5,5 @@
 A jegyzet témakörönként külön-külön fájlra van bontva.
 
 Linkek:
- - [Polinom jegyzet link](polinom/dimat2-polinom.pdf)
- - [Számelmélet jegyzet link](számelmélet/dimat2-számelmélet.pdf)
+ - [Polinom jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/dimat2/polinom/dimat2-polinom.pdf)
+ - [Számelmélet jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/dimat2/sz%C3%A1melm%C3%A9let/dimat2-sz%C3%A1melm%C3%A9let.pdf)

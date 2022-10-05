@@ -7,5 +7,5 @@ A gyakorlat jegyzet készült később, ez a szebbik, pontosabb jegyzet, ami ZH-
 Az előadás jegyzet néhol csúnyábban formázott, viszont több információ található benne, így a vizsgára készüléshez hasznosabb.
 
 Linkek:
- - [Gyakorlat jegyzet link](gyakorlat/progelm-gyak.pdf)
- - [Előadás jegyzet link](előadás/progelm-ea.pdf)
+ - [Gyakorlat jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/progelm/gyakorlat/progelm-gyak.pdf)
+ - [Előadás jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/progelm/el%C5%91ad%C3%A1s/progelm-ea.pdf)
