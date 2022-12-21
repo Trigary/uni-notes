@@ -19,3 +19,6 @@ a GitHub nem túl kényelmes PDF nézegetője helyett a böngésző beépített 
 | 2021-22-2 | IP-18bFNYFPRE/G | Formális nyelvek és fordítóprogramok alapjai |  [link](fonya-fordprog/README.md) |
 | 2021-22-2 | IP-18bVSZEG | Valószínűségszámítás és statisztika |  [link](valszám-stat/README.md) |
 | 2021-22-2 | IP-18bNM1E/G | Numerikus módszerek I |  [link](nummód1/README.md) |
+| 2022-23-1 | IP-18TKHE/G | Telekommunikációs hálózatok |  [link](telekomm/README.md) |
+| 2022-23-1 | IP-18bAB2E/G | Adatbázisok II |  [link](adatb2/README.md) |
+| 2022-23-1 | IP-18bNM2EG | Numerikus módszerek II |  [link](nummód2/README.md) |

@@ -1,0 +1,983 @@
+% !TeX spellcheck = hu_HU
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[magyar]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\usepackage{outlines}
+\usepackage{hyperref}
+\usepackage{caption}
+
+\hyphenpenalty=10000
+
+\def\ojoin{\setbox0=\hbox{$\bowtie$}%
+	\rule[-.02ex]{.25em}{.4pt}\llap{\rule[\ht0]{.25em}{.4pt}}}
+\def\leftouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie}}
+\def\rightouterjoin{\mathbin{\bowtie\mkern-5.8mu\ojoin}}
+\def\fullouterjoin{\mathbin{\ojoin\mkern-5.8mu\bowtie\mkern-5.8mu\ojoin}}
+
+\def\tef{\to\to}
+
+\begin{document}
+
+\begin{center}
+	\huge
+	Adatbázisok II\\
+	\vspace{1mm}
+	\LARGE
+	Gyakorlat jegyzet\\
+	\vspace{5mm}
+	\large
+	Készült Brányi László gyakorlatai\\
+	és Nikovits Tibor jegyzetei alapján\\
+	\vspace{5mm}
+	Sárközi Gergő, 2022-23-1. félév\\
+	Nincsen lektorálva!
+\end{center}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Bevezetés}
+
+\begin{outline}
+	\1 Oracle-t tanulunk (vannak esetek, amikor eltér pl. PostgreSQL-től)
+	\1 Hivatalos dokumentáció:\\
+	https://docs.oracle.com/en/database/oracle/oracle-database/12.2/refrn/index.html
+		\2 De rá Google-zni pl. rendszertáblára általában egyszerűbb, gyorsabb
+\end{outline}
+
+\section{Vegyes jegyzet, nem túl hasznos}
+
+\subsection{Vegyes infók}
+
+\begin{outline}
+	\1 Továbbra is igaz: jó megoldás sokszor az összes lehetőség mínusz rosszak
+	\1 Table "elsődleges kulcs": tábla tulajdonosa + tábla neve
+	\1 Oracle minden szám típusból vagy \texttt{NUMBER}-t vagy \texttt{FLOAT}-ot csinál
+		\2 \texttt{int = number(*,0)}, azaz \texttt{precision=NULL}, \texttt{scale=0}
+	\1 Ha PLSQL definíciók előtt és mögött \texttt{/} jel van, akkor az SqlDeveloper is felfogja, hogy hol van vége a definíciónak
+\end{outline}
+
+\subsection{Kis-, nagybetű érzékenység}
+
+\begin{outline}
+	\1 \texttt{'} között számít a kis- és nagybetű, egyébként nem
+	\1 Azaz lehet kisbetűs táblát létrehozni, erre vigyázni kell
+	\1 Oracle: alapból nagybetűs minden (talán 1-2 kivétellel)
+\end{outline}
+
+\subsection{NULL-nal kapcsolatos érdekességek}
+
+\begin{outline}
+	\1 Unique oszlopba több NULL kerülhet: NULL nem egyenlő önmagával
+	\1 \texttt{SELECT DISTINCT} csak egy NULL értéket hagy meg
+	\1 \texttt{intersect}, stb nem mindig működik (pl. \texttt{NULL} miatt), ezért először érdemes a szükséges oszlopokra szűrni
+\end{outline}
+
+\pagebreak
+
+\subsection{Oszlop default érték}
+
+\begin{outline}
+	\1 Beszúrás: NULL nem lesz felülírva DEFAULT érték által
+	\1 Oszlop: \text{default 1+1} esetén \texttt{1+1} ki lesz értékelve minden default beszúrásnál
+	\1 \texttt{insert into test values (...)} esetén nem működik a default
+		\2 Helyesen: \texttt{insert into test (...) values (...)}
+\end{outline}
+
+\subsection{Nézettábla, view}
+
+\begin{outline}
+	\1 Készítés: \texttt{create (materialized) view <név> as <lekérdezés>}
+	\1 Készítésnél a \texttt{select *}-ban a \texttt{*} helyett oszlop felsorolás van mentve
+\end{outline}
+
+\subsection{Szinonima, synonym}
+
+\begin{outline}
+	\1 Készítés: \texttt{create synonym <név> for <tulaj>.<tábla>}
+\end{outline}
+
+\subsection{Adatbázis link}
+
+\begin{outline}
+	\1 \texttt{drop database link ullman\_link;}
+	\1 \texttt{create database link ullman\_link connect to username\\identified by password using 'ullman';}
+	\1 \texttt{select * from NIKOVITS.VILAG\_ORSZAGAI@ullman\_link;}
+\end{outline}
+
+\pagebreak
+
+\subsection{Virtuális oszlopok}
+
+\begin{outline}
+	\1 \texttt{level}: ha \texttt{select connect by} van használva (fabejárás)
+	\1 \texttt{rownum}: kimenetben sorszámozás
+		\2 pl. \texttt{select rownum, emp.* from nikovits.emp}
+	\1 \texttt{rowid}: sor pozícióját adja meg
+		\2 Base64: A-Z=0-25, a-z=26-51, 0-9=52-61, '+'=62, '/'=63
+		\2 18 karakteres a formátum: OOOOOOFFFBBBBBBRRR
+		\2 OOOOOO: adatobjektum azonosító
+			\3 \texttt{substr(rowid, 1, 6) objekt\_azon}
+			\3 \texttt{dbms\_rowid.rowid\_object(rowid) objekt\_azon}
+		\2 FFF: fájl azonosító (táblatéren belül relatív sorszám)
+			\3 \texttt{substr(rowid, 7, 3) fajl\_azon}
+			\3 \texttt{dbms\_rowid.rowid\_relative\_fno(rowid) fajl\_azon}
+		\2 BBBBBB: blokk azonosító (fájlon belüli sorszám)
+			\3 \texttt{substr(rowid, 10, 6) blokk\_azon}
+			\3 \texttt{dbms\_rowid.rowid\_block\_number(rowid) blokk\_azon}
+		\2 RRR: sor azonosító (blokkon belüli sorszám)
+			\3 \texttt{substr(rowid, 16, 3) sor\_azon}
+			\3 \texttt{dbms\_rowid.rowid\_row\_number(rowid) sor\_azon}
+\end{outline}
+
+\subsection{Kimenet sorainak számának korlátozása}
+
+\begin{outline}
+	\1 Konstans sor szám akkor is, ha azonos "értékű" sorok vannak
+		\2 Azaz ezek nem feltétlenül helyes megoldások min/max keresésre
+		\2 A) \texttt{... FETCH FIRST n ROWS ONLY;}
+		\2 B) Két query: belsőben \texttt{ORDER BY}, külsőben \texttt{WHERE rownum<n}
+	\1 Minimum/maximum: \texttt{WHERE score = (SELECT MAX(score) FROM ...)}
+	\1 Min/max példáján \texttt{=} helyett \texttt{IN} és \texttt{MAX} helyett N legnagyobb értékű sor visszaadásával "X legnagyobb értékű sor" típusú feladat megoldható
+\end{outline}
+
+\pagebreak
+
+\subsection{Fizikai és logikai tárolási egységek}
+
+\begin{outline}
+	\1 Logikai: séma, adatbázis, táblatér, szegmens, extens, adatblokk
+		\2 Ez a tartalmazási sorrend is
+		\2 A tábla is egy szegmens
+		\2 Extens: fájlon belüli szomszédos adatblokkok
+		\2 Szegmens: adatblokkokból álló tárolandó objektum
+			\3 Pl. nézettáblához nem tartozik szegmens (sem object\_id)
+	\1 Fizikai: fájl, fájlon belül blokkok
+	\1 Logikai táblaterek tartalmaznak fizikai fájlokat
+	\1 Fizikai fájlok tartalmaznak logikai extenseket és fizikai blokkokat
+	\1 Logikai adatblokk ekvivalens a fizikai adatblokkal
+\end{outline}
+
+\subsubsection{Szegmens, blokk, stb. tudnivalók}
+
+\begin{outline}
+	\1 Egy blokk lehet szegmenshez rendelve anélkül, hogy lenne benne adat
+\end{outline}
+
+\subsection{Új tábla létrehozás, tábla konfigurálás}
+
+\begin{outline}
+	\1 Ezek \texttt{create table <név> ...} vagy \texttt{alter table <név> ...} után
+	\1 \texttt{tablespace <név>}: hova tartozzon a tábla
+	\1 \texttt{storage (initial 128K)}: alapból 128Kb legyen lefoglalva
+		\2 \texttt{allocate extent (size 128K)}: utólagos bővítés
+	\1 \texttt{pctfree 20}: fejléc és adatok közötti üres hely blokkokban; ez lesz kihasználva, ha pl. bejön új oszlop (fejléc az elejéről, adat a végéről van írva, így az üres hely középen van)
+	\1 \texttt{pctused 40}: blokkot legalább ennyire ki kéne használni
+\end{outline}
+
+\pagebreak
+
+\subsection{Indexek}
+
+\begin{outline}
+	\1 Létrehozás: \texttt{CREATE [UNIQUE/BITMAP] INDEX emp\_ind on emp(empno);}
+		\2 Több oszlop, függvény: ...\texttt{on emp (job, SUBSTR(ename, 2, 2))}
+	\1 Unique index is "constraint nem teljesül" hibaüzenetet adhat
+	\1 Index típusa
+		\2 Több oszlop $\implies$ lehet még normál
+		\2 Több oszlop, de az egyik DESC $\implies$ function
+			\3 Ezért láthatunk mezőt \texttt{dba\_ind\_expressions}-ben
+		\2 function van indexben $\implies$ function
+			\3 Ilyenkor az index oszlop neve ilyesmi: \texttt{NC000\#\#\#\#}
+\end{outline}
+
+\subsubsection{Index szervezett tábla (Index Organized Table, IOT)}
+
+\begin{outline}
+	\1 \begin{verbatim}
+		CREATE TABLE cikk_iot (
+		    ckod integer,
+		    cnev varchar2(20),
+		    szin varchar2(15),
+		    suly float,
+		    CONSTRAINT cikk_iot_pk PRIMARY KEY (ckod)
+		) ORGANIZATION INDEX
+		PCTTHRESHOLD 20 INCLUDING cnev --Opcionális
+		OVERFLOW TABLESPACE users; --Opcionális
+	\end{verbatim}
+	\1 Új index hozzáadása meglévő IOT táblához:\\
+	\texttt{CREATE INDEX CIKK\_IOT\_SZIN on cikk\_iot(szin);}
+	\1 Táblatér: IOT esetén NULL, IOT overflow esetén viszont van
+	\1 A táblához nem tartozik szegmens, csak az indexhez
+\end{outline}
+
+\pagebreak
+
+\subsection{Particionált táblák}
+
+\begin{outline}
+	\1 \texttt{rowid} alapján meg lehet mondani, hogy melyik partícióban van az adat
+	\1 \texttt{SUBPARTITION} alatt már nincsen réteg
+	\1 A \texttt{OWNER}, \texttt{SEGMENT\_NAME} több szegmenst is azonosíthat, ezért egyedi azonosítóhoz hozzájuk kell venni \texttt{PARTITION\_NAME}-t is
+		\2 \texttt{SELECT partition\_name, bytes FROM dba\_segments\\
+			WHERE owner='NIKOVITS' AND segment\_name='ELADASOK';}
+		\2 Azaz szegmens neve a tábla neve, de adatokat a partíciók tárolják
+	\1 \begin{verbatim}
+--Particionálás tartományok alapján
+CREATE TABLE eladasok (
+    szla_szam NUMBER(5), szla_nev CHAR(30),
+    mennyiseg NUMBER(6), het INTEGER
+) PARTITION BY RANGE (het) (
+  PARTITION negyedev1  VALUES LESS THAN (13) SEGMENT CREATION IMMEDIATE 
+    STORAGE(INITIAL 8K NEXT 8K) TABLESPACE users,
+  PARTITION negyedev2  VALUES LESS THAN (26) SEGMENT CREATION IMMEDIATE 
+    STORAGE(INITIAL 8K NEXT 8K) TABLESPACE example,
+  PARTITION negyedev3  VALUES LESS THAN (39) SEGMENT CREATION IMMEDIATE  
+    STORAGE(INITIAL 8K NEXT 8K) TABLESPACE users,
+  PARTITION negyedev4  VALUES LESS THAN (MAXVALUE) SEGMENT CREATION
+    IMMEDIATE STORAGE(INITIAL 8K NEXT 8K) TABLESPACE users
+); \end{verbatim}
+	\1 \begin{verbatim}
+--Particionálás hash kulcs alapján és hash alapú alparticionálás
+CREATE TABLE eladasok2 (
+  szla_szam NUMBER(5), szla_nev CHAR(30),
+  mennyiseg NUMBER(6), het INTEGER
+) PARTITION BY HASH ( het )
+    SUBPARTITION BY HASH (mennyiseg) SUBPARTITIONS 3 --opcionális
+( PARTITION part1 SEGMENT CREATION IMMEDIATE TABLESPACE users, 
+  PARTITION part2 SEGMENT CREATION IMMEDIATE TABLESPACE example, 
+  PARTITION part3 SEGMENT CREATION IMMEDIATE TABLESPACE users
+);
+	\end{verbatim}
+\pagebreak
+	\1 \begin{verbatim}
+--Particionálás lista alapján és minta list alapú alparticionálás
+CREATE TABLE eladasok3 (
+  szla_szam NUMBER(5), szla_nev CHAR(30), 
+  mennyiseg NUMBER(6), het INTEGER
+) PARTITION BY LIST ( het )
+    SUBPARTITION BY LIST (het) SUBPARTITION TEMPLATE
+    ( SUBPARTITION lista VALUES(1,2,3,4,5),
+      SUBPARTITION other VALUES(DEFAULT)    )
+( PARTITION part1 VALUES(1,2,3,4,5)   SEGMENT CREATION IMMEDIATE 
+  STORAGE(INITIAL 8K NEXT 8K) TABLESPACE users, 
+  PARTITION part2 VALUES(6,7,8,9)     SEGMENT CREATION IMMEDIATE 
+  STORAGE(INITIAL 8K NEXT 8K) TABLESPACE example, 
+  PARTITION part3 VALUES(10,11,12,13) SEGMENT CREATION IMMEDIATE 
+  STORAGE(INITIAL 8K NEXT 8K) TABLESPACE users
+);
+	\end{verbatim}
+\end{outline}
+
+\subsection{Klaszter táblák}
+
+\begin{outline}
+	\1 Eltérő tábláknak egyes sorainak azonos \texttt{rowid}-je lesz (klaszter lényege)
+	\1 Eltérő \texttt{object\_id}-hez tartozhat megegyező \texttt{data\_object\_id}
+	\1 Csak klaszternek van szegmense (tábláknak nincs)
+	\1 Index klaszter létrehozása: (index létrehozása nélkül nem lehet beszúrni)\\
+	\texttt{CREATE CLUSTER perspnnel\_cl (dep\_num NUMBER(2)) SIZE 4K;}\\
+	\texttt{CREATE INDEX personnel\_cl\_idx ON CLUSTER personnel\_cl;}
+	\1 Hash klaszter: \texttt{CREATE CLUSTER cikk\_hcl (ckod NUMBER) [...]}
+		\2 Automatikus hash: ...\texttt{[SIZE 4K] [SINGLE TABLE] HASHKEYS 30;}
+		\2 Saját hash: ...\texttt{HASHKEYS 30 HASH IS MOD(ckod, 53);}
+	\1 Táblák létrehozása klaszteren: \begin{verbatim}
+CREATE TABLE emp_clt (
+  empno NUMBER PRIMARY KEY, ename VARCHAR2(30), job VARCHAR2(27),
+  mgr NUMBER(4), hiredate DATE, sal NUMBER(7,2), comm NUMBER(7,2), 
+  deptno NUMBER(2) NOT NULL
+) CLUSTER personnel_cl (deptno);
+CREATE TABLE dept_clt (
+  deptno NUMBER(2), dname VARCHAR2(42), loc VARCHAR2(39)
+) CLUSTER personnel_cl (deptno);
+	\end{verbatim}
+\end{outline}
+
+\pagebreak
+
+\section{Nevezetes rendszertáblák}
+
+\begin{outline}
+	\1 \texttt{DBA\_...} helyett írható más prefix is:
+		\2 \texttt{DBA}: rendszergazda által elérhető valamik
+		\2 \texttt{ALL}: mindenki által elérhető valamik
+			\3 Dokumentáció szerint: általam elérhető (gyakon mást mondtak)
+		\2 \texttt{USER}: általam birtokolt valamik, ilyenkor nincs \texttt{owner} oszlop
+	\1 \texttt{DBA\_OBJECTS}: objektumok (amik akár 0 helyet foglalnak)
+		\2 \texttt{OWNER}: adatobjektum (szegmens) birtokosa
+		\2 \texttt{DATA\_OBJECT\_ID}: adatobjektum (szegmens) azonosítója
+			\3 Pl. nézettábla esetén NULL
+		\2 \texttt{OBJECT\_ID}: egyedi azonosító; \texttt{OBJECT\_NAME}: név
+		\2 \texttt{SUBOBJECT\_NAME}: összetett objektumnál (pl. particionált tábla)
+		\2 \texttt{OBJECT\_TYPE}: pl.: TABLE, INDEX, VIEW, stb.
+		\2 \texttt{CREATED}: létrehozás dátuma
+	\1 \texttt{DBA\_TABLES}
+		\2 \texttt{OWNER}, \texttt{TABLE\_NAME}, \texttt{TABLESPACE\_NAME}
+		\2 \texttt{CLUSTER\_OWNER}, \texttt{CLUSTER\_NAME}: tábla melyik klaszteren van / NULL
+		\2 \texttt{NUM\_ROWS}: táblának sorainak BECSÜLT száma
+		\2 \texttt{BLOCKS}: tábla által foglalt blokkok BECSÜLT száma
+		\2 \texttt{IOT\_TYPE}: IOT vagy IOT\_OVERFLOW vagy NULL
+		\2 \texttt{IOT\_NAME}: \texttt{IOT\_OVERFLOW} esetén IOT neve
+		\2 \texttt{PARTITIONED}: YES vagy NO
+\pagebreak
+	\1 \texttt{DBA\_TAB\_COLUMNS}
+		\2 \texttt{OWNER}, \texttt{COLUMN\_NAME}
+		\2 \texttt{COLUMN\_NAME}, \texttt{COLUMN\_ID}: oszlop név és sorsszám
+		\2 \texttt{TABLE\_NAME}: tábla/nézet/klaszter neve
+		\2 \texttt{DATA\_TYPE}: oszlop adattípusa
+		\2 \texttt{DATA\_LENGTH}: adattípus hossza, pl. \texttt{CHAR(10)} esetén 10
+		\2 \texttt{DATA\_PRECISION}, \texttt{DATA\_SCALE}: \texttt{NUMBER(10,2)} esetén 10 és 2
+			\3 Azaz a precision az értékes jegyek, a scale a tizedesek száma
+		\2 \texttt{NULLABLE}: NULL engedélyezett-e, érték: Y/N
+		\2 \texttt{DATA\_DEFAULT}: DEFAULT érték, ha van
+		\2 \texttt{NUM\_DISTINCT}: oszlopban lévő különböző értékek BECSÜLT száma
+	\1 \texttt{DBA\_SYNONYMS}
+		\2 \texttt{OWNER}, \texttt{SYNONYM\_NAME}
+		\2 \texttt{TABLE\_OWNER}, \texttt{TABLE\_NAME}: tábla/nézet, amire a szinonima mutat
+		\2 \texttt{DB\_LINK}: lokális tábla: NULL, remote: adatbázis-kapcsoló neve
+	\1 \texttt{DBA\_VIEWS}
+		\2 \texttt{OWNER}, \texttt{VIEW\_NAME}
+		\2 \texttt{TEXT}: nézet lekérdezésének a szövege
+	\1 \texttt{DBA\_SEQUENCES}
+		\2 \texttt{SEQUENCE\_OWNER}, \texttt{SEQUENCE\_NAME}
+		\2 \texttt{MIN\_VALUE}, \texttt{MAX\_VALUE}, \texttt{INCREMENT\_BY}
+	\1 \texttt{DBA\_DB\_LINKS}
+		\2 \texttt{OWNER}, \texttt{DB\_LINK}
+		\2 \texttt{HOST}, \texttt{USERNAME}
+\pagebreak
+	\1 \texttt{DBA\_DATA\_FILES}
+		\2 \texttt{FILE\_NAME}: operációs rendszerbeli fájlnév
+		\2 \texttt{FILE\_ID}: adatbázis rendszerben fájl azonosítója
+		\2 \texttt{RELATIVE\_FNO}: táblatéren belüli egyedi fájl azonosító
+		\2 \texttt{TABLESPACE\_NAME}: melyik táblatérhez tartozik a fájl
+		\2 \texttt{BYTES}, \texttt{BLOCKS}: fájl jelenlegi mérete
+		\2 \texttt{AUTOEXTENSIBLE}: automatikusan növelheti-e a fájlt az OS
+		\2 \texttt{MAXBYTES}, \texttt{MAXBLOCKS}: maximális méret, amire növekedhet a fájl
+	\1 \texttt{DBA\_TEMP\_FILES}: temporális táblatérhez tartozó adatfájlok
+		\2 Szerkezet: azonos \texttt{DBA\_DATA\_FILES}-zal
+	\1 \texttt{DBA\_TABLESPACES}: táblatér az adatfájlok logikai csoportja
+		\2 \texttt{TABLESPACE\_NAME}: táblatér neve
+		\2 \texttt{BLOCK\_SIZE}: adatblokkok mérete a táblatéren
+		\2 \texttt{STATUS}: ONLINE vagy OFFLINE
+		\2 \texttt{CONTENTS}: PERMANENT vagy UNDO vagy TEMPORARY
+	\1 \texttt{DBA\_SEGMENTS}: szegmens egy adatblokkokból álló tárolandó objektum
+		\2 \texttt{OWNER}, \texttt{SEGMENT\_NAME} (pl. tábla tulajdonosa és neve)
+		\2 \texttt{SEGMENT\_TYPE}: pl. TABLE, INDEX, TABLE\_PARTITION, CLUSTER
+		\2 \texttt{TABLESPACE\_NAME}: melyik táblatéren van a szegmens tárolva
+		\2 \texttt{PARTITION\_NAME}: particionált tábla esetén, egyébként NULL
+		\2 \texttt{BYTES}, \texttt{BLOCKS}: szegmens mérete
+		\2 \texttt{EXTENTS}: szegmens extenseinek száma
+	\1 \texttt{DBA\_EXTENTS}: extens a fájlon belüli szomszédos adatblokkokból álló tárolási egység
+		\2 \texttt{OWNER}, \texttt{SEGMENT\_NAME}, \texttt{SEGMENT\_TYPE}: mint szegmensnél
+		\2 \texttt{TABLESPACE\_NAME}, \texttt{FILE\_ID}: hol van az extens tárolva
+		\2 \texttt{EXTENT\_ID}: extens sorszáma a szegmensen belül
+		\2 \texttt{BLOCK\_ID}: extens első blokkjának sorszáma fájlon belül
+		\2 \texttt{BYTES}, \texttt{BLOCKS}: extens mérete
+\pagebreak
+	\1 \texttt{DBA\_FREE\_SPACE}: fájlon belüli összefüggő szabad terület
+		\2 \texttt{TABLESPACE\_NAME}, \texttt{FILE\_ID}
+		\2 \texttt{BLOCK\_ID}: szabad terület első blokkjának sorszáma fájlon belül
+		\2 \texttt{BYTES}, \texttt{BLOCKS}: szabad terület mérete
+	\1 \texttt{DBA\_INDEXES}
+		\2 \texttt{TABLE\_OWNER}, \texttt{TABLE\_NAME}: melyik táblához való az index
+		\2 \texttt{OWNER}: index tulajdonosa (pl. tábla owner vagy adatbázis rendszer)
+		\2 \texttt{INDEX\_NAME}: index neve (ez alapján megtalálható a szegmens)
+		\2 \texttt{INDEX\_TYPE}: NORMAL, NORMAL/REV, BITMAP, CLUSTER,\\
+		FUNCTION-BASED NORMAL, IOT - TOP
+		\2 \texttt{TABLESPACE\_NAME}: index melyik táblatéren van tárolva
+		\2 \texttt{UNIQUENESS}: előfordulhatnak-e azonos értékek
+		\2 \texttt{COMPRESSION}: ismétlődő értékek hatékonyabb tárolását szolgálja
+		\2 \texttt{PREFIX\_LENGTH}: tömörítés hány oszlopnyi legyen
+	\1 \texttt{DBA\_IND\_COLUMNS}
+		\2 \texttt{TABLE\_OWNER}, \texttt{TABLE\_NAME}, \texttt{INDEX\_OWNER}, \texttt{INDEX\_NAME}
+		\2 \texttt{COLUMN\_NAME}: indexelt oszlop neve
+		\2 \texttt{COLUMN\_POSITION}: indexelt oszlopok közül ez az oszlop hányadik
+		\2 \texttt{DESCEND}: csökkenő sorrendben van-e az indexelés
+	\1 \texttt{DBA\_IND\_EXPRESSIONS}: függvényszerű index oszlopok (vagy DESC mező)
+		\2 \texttt{TABLE\_OWNER}, \texttt{TABLE\_NAME}, \texttt{INDEX\_OWNER}, \texttt{INDEX\_NAME}
+		\2 \texttt{COLUMN\_EXPRESSION}: kifejezés, ami alapján épül fel az index
+		\2 \texttt{COLUMN\_POSITION}: kifejezés hányadik az index bejegyzések sorrendjében
+\pagebreak
+	\1 \texttt{DBA\_CLUSTERS}
+		\2 \texttt{CLUSTER\_NAME}, \texttt{OWNER}
+		\2 \texttt{CLUSTER\_TYPE}: INDEX vagy HASH
+		\2 \texttt{FUNCTION}: NULL (index típus), DEFAULT2 vagy "hash expression"
+		\2 \texttt{HASHKEYS}: nem hash klaszter típus esetén 0
+		\2 \texttt{SINGLE\_TABLE}: Y vagy N
+	\1 \texttt{DBA\_CLU\_COLUMNS}: táblák oszlopainak megfeleltetése klaszter kulcsnak
+		\2 \texttt{CLUSTER\_NAME}, \texttt{OWNER}
+		\2 \texttt{TABLE\_NAME}: tábla neve, \texttt{OWNER} azonos (közös)
+		\2 \texttt{CLU\_COLUMN\_NAME}: klaszter kulcs neve
+		\2 \texttt{TAB\_COLUMN\_NAME}: klaszter kulccsal egyeztetett tábla oszlop neve
+	\1 \texttt{DBA\_CLUSTER\_HASH\_EXPRESSIONS}: hash klaszterek hash függvényei
+		\2 \texttt{CLUSTER\_NAME}, \texttt{OWNER}
+		\2 \texttt{HASH\_EXPRESSION}: szöveges kifejezés, ami alapján a hash megy\\
+		(Soha nem NULL: olyankor csak nincsen bejegyzés ebben a táblában)
+\pagebreak
+	\1 \texttt{DBA\_PART\_TABLES}
+		\2 \texttt{TABLE\_NAME}, \texttt{OWNER}
+		\2 \texttt{PARTITIONING\_TYPE}: RANGE vagy HASH vagy LIST
+		\2 \texttt{SUBPARTITIONING\_TYPE}: NONE vagy fentiek közül egy
+		\2 \texttt{PARTITION\_COUNT}, \texttt{DEF\_SUBPARTITION\_COUNT}: legalább 0
+	\1 \texttt{DBA\_PART\_INDEXES}
+	\1 \texttt{DBA\_TAB\_PARTITIONS}
+		\2 \texttt{TABLE\_NAME}, \texttt{TABLE\_OWNER}
+		\2 \texttt{PARTITION\_NAME}: partíció neve
+		\2 \texttt{PARTITION\_POSITION}: hányadik partíciója a táblának
+		\2 \texttt{COMPOSITE}: van-e alpartició
+		\2 \texttt{SUBPARTITION\_COUNT}: legalább 0
+		\2 \texttt{HIGH\_VALUE}: mi a particionálás határa: szám, lista, MAXVALUE, NULL (hash esetén)
+	\1 \texttt{DBA\_IND\_PARTITIONS}
+		\2 Nem néztük meg, nem volt róla szó sehol
+	\1 \texttt{DBA\_TAB\_SUBPARTITIONS}
+		\2 Szerkezet nagy része: lásd \texttt{DBA\_TAB\_PARTITIONS}
+		\2 Extra mezők: \texttt{SUBPARTITION\_NAME}, \texttt{SUBPARTITION\_POSITION}
+	\1 \texttt{DBA\_IND\_SUBPARTITIONS}
+		\2 Nem néztük meg, nem volt róla szó sehol
+	\1 \texttt{DBA\_PART\_KEY\_COLUMNS}: mi alapján történik a particionálás
+		\2 \texttt{NAME}, \texttt{OWNER}
+		\2 \texttt{COLUMN\_POSITION}, \texttt{COLUMN\_NAME}: particionálás X-edik szempontja
+	\1 \texttt{DBA\_SUBPART\_KEY\_COLUMNS}: mi alapján történik az alparticionálás
+		\2 Szerkezete megegyezik \texttt{DBA\_PART\_KEY\_COLUMNS}-zal
+\end{outline}
+
+\pagebreak
+
+\section{Lekérdezés tervek, hintek}
+
+\subsection{Lekérdezési terv lekérdezése}
+
+\begin{outline}
+	\1 A lekérdezést \texttt{EXPLAIN PLAN FOR ...}-ral kell kezdeni
+	\1 A lekérdezést végre kell hajtani
+	\1 Utolsó terv lekérdezése 'serial' módon:\\
+	\texttt{select * from table(dbms\_xplan.display());}
+		\2 Extra paraméterek megadhatóak, de jó ez így ZH-ra
+	\1 Összes eddigi terv lekérdezése:\\
+	\texttt{select * from plan\_table order by plan\_id, id;}
+	\1 \texttt{EXPLAIN PLAN} nélkül is le lehet kérdezni a tervet: fejlesztőkörnyezetekben van erre egy dedikált gomb
+\end{outline}
+
+\subsection{Tábla összekapcsolás típusok}
+
+\begin{outline}
+	\1 Descartes szorzat, \texttt{INNER JOIN ON}: duplikált oszlopokot megtartja
+	\1 \texttt{NATURAL JOIN}, \texttt{INNER JOIN USING}: duplikált oszlopok elvetése
+		\2 \texttt{USING} lényege: ne az összes azonos nevű oszlop legyen használva az összekapcsoláshoz
+\end{outline}
+
+\subsection{Hintek megadása}
+
+\begin{outline}
+	\1 Hintek befolyásolják, hogy egy művelet hogyan legyen megvalósítva
+	\1 \texttt{SELECT}, \texttt{UPDATE}, \texttt{DELETE}, \texttt{INSERT} után állhat,
+	belső lekérdezésben is
+	\1 Szintaxis: \texttt{<utasítás> /*+ tipp1 tipp2 stb */ ...}
+		\2 A \texttt{+} jel előtt nincsen szóköz
+		\2 Tippek és tipp paraméterek elválasztója: szóköz
+	\1 Hibás hintek figyelmen kívül vannak hagyva (nincs hibaüzenet)
+	\1 Tábla megadása hint paraméterül
+		\2 Ha van alias, akkor kötelező az alias-t használni
+		\2 A sémát (tábla tulajdonosát) tilos kiírni
+\end{outline}
+
+\pagebreak
+
+\subsection{Fontosabb tippek (hintek) listája}
+
+\subsubsection{Egyéb, más kategóriába nem illő beállítások}
+
+\begin{outline}
+	\1 Optimalizálás típusa: \texttt{all\_rows} vagy \texttt{first\_rows(count)}
+	\1 Összekapcsolások sorrendje:
+		\2 \texttt{ordered}: SQL utasításban található sorrend használata
+		\2 \texttt{leading(táblalista)}: listában szereplők legyenek elsők
+\end{outline}
+
+\subsubsection{Elérési útvonal konfigurálása}
+
+\begin{outline}
+	\1 \texttt{[indexlista]} jelentése: 0 vagy több index felsorolása
+	\1 \texttt{full(tábla)}: indexek használata helyett full table scan
+	\1 \texttt{cluster(tábla)}, \texttt{hash(tábla)}: csak index/hash klaszteren értelmezett
+	\1 \texttt{index(tábla [indexlista])}: (felsoroltak közül legolcsóbb) index segítségével legyen a tábla elérve (lista lehet üres)
+		\2 \texttt{no\_index(tábla [indexlista])}: ne legyenek az indexek használva
+	\1 \texttt{index\_asc(tábla [indexlista])} vagy \texttt{index\_desc(tábla [indexlista])}: normál vagy fordított sorrendben legyen az index bejárva
+	\1 \texttt{index\_combine(tábla [indexlista])}: bitmap indexek használata
+	\1 \texttt{index\_ffs(tábla [indexlista])}: fast full index scan használata
+		\2 \texttt{no\_index\_ffs(tábla [indexlista])}: ennek a megtiltása
+	\1 \texttt{index\_join(tábla [indexlista])}: több index használata, a sorazonosítók join-olásával legyen elérve a tábla
+	\1 \texttt{index\_equal(tábla [indexlista])}: több index használata, a sorazonosítók metszetével legyen elérve a tábla 
+\end{outline}
+
+\pagebreak
+
+\subsubsection{SQL transzformációk konfigurálása}
+
+\begin{outline}
+	\1 \texttt{no\_query\_transformation}: minden tiltása
+	\1 \texttt{no\_expand}: lekérdezésben található \texttt{OR} vagy \texttt{IN} mentén lekérdezés több darabra darabolásának megtiltása
+	\1 \texttt{use\_concat}: \texttt{OR} feltételekből unió létrehozása (előző ellentéte)
+\end{outline}
+
+\subsubsection{Tábla összekapcsolás konfigurálása}
+
+\begin{outline}
+	\1 \texttt{táblalista} jelentése: 2 vagy több tábla felsorolása
+	\1 Alábbiakhoz létezik értelemszerű \texttt{no\_} prefixű változat is
+	\1 \texttt{use\_hash(táblalista)}: hash join használata
+	\1 \texttt{use\_nl(táblalista)}: nested loop join használata
+	\1 \texttt{use\_merge(táblalista)}: merge sort join használata
+	\1 Belső lekérdezésekben, táblalista nélkül használható:
+		\2 \texttt{nl\_sj}, \texttt{hash\_sj}, \texttt{merge\_sj}: semi join használata
+		\2 \texttt{nl\_aj}, \texttt{hash\_aj}, \texttt{merge\_aj}: anti join használata
+\end{outline}
+
+\subsection{Műveletek (operations), amit a tervben olvashatunk}
+
+\begin{outline}
+	\1 dr. Nikovits Tibor honlapján található \texttt{tervekN.txt} sokat segít: megmutatja, hogy milyen lekérdezés eredményez adott elemeket tartalmazó tervet
+	\1 \texttt{INLIST ITERATOR}: műveletek ismétlése ciklusban
+	\1 \texttt{TABLE ACCESS FULL/HASH/CLUSTER}: lásd \texttt{full(tábla)} vagy \texttt{hash(tábla)} vagy \texttt{cluster(tábla)} hint
+	\1 \texttt{TABLE ACCESS BY INDEX ROWID}: index segítségével tábla elérés
+	\1 \texttt{PARTITION RANGE ALL/SINGLE/ITERATOR}: összes/1/több partíció olvasása
+	\1 \texttt{SORT AGGREGATE/UNIQUE/GROUP BY/JOIN/ORDER BY}: adott művelet rendezés segítségével történő megvalósítása
+		\2 Ha \texttt{SORT UNIQUE NOSORT} szükséges: próbálkozzunk szöveg oszloppal
+	\1 \texttt{HASH UNIQUE/GROUP BY}: adott művelet hasítás segítségével történő megvalósítása
+		\2 Ha \texttt{SORT} kéne de a tervben \texttt{HASH} van: csináljuk egy \texttt{ORDER BY}-t
+		\2 Ha \texttt{HASH} kéne de \texttt{SORT} van: csináljunk explicit \texttt{GROUP BY}-t
+	\1 \texttt{UNION-ALL}: duplikátumokat megtartó unió
+		\2 \texttt{UNION} megvalósítása: \texttt{UNION-ALL} után \texttt{DISTINCT}
+	\1 \texttt{MINUS}, \texttt{INTERSECTION}, \texttt{CONCATENATION}: sorhalmazok műveletei
+	\1 \texttt{AND-EQUAL}: sorazonosító halmazok metszetének képezése
+	\1 \texttt{VIEW}: ???
+	\1 \texttt{FILTER}: sorhalmaz szűrése: \texttt{WHERE} vagy \texttt{HAVING}
+	\1 Összekapcsolások
+		\2 \texttt{NESTED LOOPS}
+		\2 \texttt{MERGE JOIN}: rendezett (rész)táblák összefuttatása
+		\2 \texttt{HASH JOIN [OUTER/ANTI [NA]/SEMI]}: hasításos összekapcsolás
+			\3 \texttt{ANTI}: \texttt{NOT EXISTS}-hez vagy \texttt{NOT IN}-hez használható
+			\3 \texttt{NA}: null aware, azaz \texttt{NULL} is előfordulhat
+			\3 \texttt{SEMI}: összekapcsolás után csak egyik tábla adatai kellenek
+	\1 Indexekkel kapcsolatos műveletek
+		\2 \texttt{INDEX FULL SCAN [DESCENDING]}: lásd \texttt{index\_desc(tábla [indexlista])}
+		\2 \texttt{INDEX FAST FULL SCAN}: lásd \texttt{index\_ffs(tábla [lista])} hint
+		\2 \texttt{INDEX RANGE SCAN}: intervallumos keresés
+		\2 \texttt{INDEX SKIP SCAN}: több oszlopos index olvasása, az első oszlopok ismerete nélkül
+		\2 \texttt{INDEX UNIQUE SCAN}: egyedi értékek keresése index segítségével
+	\1 Bitmappel kapcsolatos műveletek
+		\2 \texttt{BITMAP INDEX SINGLE VALUE}: egyetlen bitvektor visszaadása
+		\2 \texttt{BITMAP AND/OR}: bitmapek közötti logikai műveletek
+		\2 \texttt{BITMAP CONVERSION TO/FROM ROWIDS}: sorazonosító-bitmap konverzió
+		\2 \texttt{BITMAP CONVERSION COUNT}: bitmapben az igaz értékek száma
+\end{outline}
+
+\pagebreak
+
+\section{Papíros rész}
+
+\subsection{B+ fa}
+
+\begin{outline}
+	\1 Minden csúcs legalább 50\%-ban telített
+		\2 Leveleknél: legalább $\lfloor \frac{n+1}{2} \rfloor$ mutató blokkra (ugyan ennyi kulcs)
+			\3 Példa: $n=3 \lor n=4 \implies \min 2$ kulcs
+		\2 Belső csúcsoknál: legalább $\lfloor \frac{n+1}{2} \rfloor$ mutató csúcsra ($\lfloor \frac{n+1}{2} \rfloor - 1$ kulcs)
+			\3 Példa: $n=3 \implies \min 1$ kulcs, $n=4 \implies \min 2$ kulcs
+		\2 Kivétel: gyökér csak legalább 1 mutatót tartalmaz
+	\1 Belső csúcsban megtalálható kulcs megtalálható levélben is
+		\2 De egy szám maximum kétszer szerepelhet (különben valami hibás)
+	\1 $n=3$ jelentése: 3 adattag, 4 mutató (levél esetén a 4.: következő levél)
+	\1 Szomszédos cellák egyesítése, összevonása:
+		\2 Beszúrásnál nem csinálunk ilyet
+		\2 Törlésnél lehetséges
+\end{outline}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.9\linewidth]{"b+ alapok"}
+\end{figure}
+
+\pagebreak
+
+\subsubsection{Beszúrás}
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.7\linewidth]{"b+ beszúrás egyszerű"}
+		\captionsetup{labelformat=empty}
+		\caption{Beszúrás: egyszerű eset}
+	\end{minipage}%
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=1\linewidth]{"b+ beszúrás új levél"}
+		\captionsetup{labelformat=empty}
+		\caption{Beszúrás: új levél}
+	\end{minipage}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.6\linewidth]{"b+ beszúrás új köztes"}
+	\captionsetup{labelformat=empty}
+	\caption{Beszúrás: új gyökér}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.65\linewidth]{"b+ beszúrás új gyökér"}
+	\captionsetup{labelformat=empty}
+	\caption{Beszúrás: új gyökér}
+\end{figure}
+
+\pagebreak
+
+\subsubsection{Törlés}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.55\linewidth]{"b+ törlés egyszerűbb"}
+	\captionsetup{labelformat=empty}
+	\caption{Törlés: egyszerűbb eset}
+\end{figure}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.65\linewidth]{"b+ törlés bonyolultabb"}
+	\captionsetup{labelformat=empty}
+	\caption{Törlés: bonyolult eset}
+\end{figure}
+
+\subsection{Lineáris hasítás}
+
+\begin{outline}
+	\1 Változók:
+		\2 $n$: adatok száma (kezdetben: $0$)
+		\2 $k$: kosarak száma (kezdetben: $1$)
+		\2 $i$: vizsgált bitek száma (kezdetben: $1$)
+		\2 $m$: max kosár sorszám eddig, nem használjuk (kezdetben: $0$)
+	\1 Konstans: $\text{küszöbszám} = 2,4$
+\pagebreak
+	\1 Változók változása
+		\2 $\text{beszúrás} \implies n := n + 1$
+		\2 $n / k > \text{küszöb} \implies k := k + 1$
+		\2 $k > 2^i \implies i := i + 1$
+		\2 A változást okozó beszúrásban már a változók új értékével dolgozunk
+			\3 pl. ha van új kosár: az új kosarat is figyelembe vesszük
+	\1 Kosaraknak van sorszámuk és 2 férőhelyük
+		\2 Megtelnek $\implies$ láncolni kell túlcsordulási blokkot (+2 férőhely)
+	\1 Adathoz tartozó kosár: sorszáma a hasító érték utolsó $i$ bitjével egyezik
+		\2 Ha nincs ilyen kosár, akkor hátulról $i$-edik bitben eltérés megengedett
+			\3 Hátulról $i$-edik bit a vizsgált bitsorozat első bitje
+	\1 Áthelyezés lehet, hogy kell, ha:
+		\2 a) $k$ nőtt: hátulról $i$-edik bitben eltérő elemeket kell megnézni
+		\2 b) $i$ nőtt: minden kosarat végig kell nézni
+		\2 Először történik az áthelyezés, utána az új érték beszúrása
+\end{outline}
+
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1\linewidth]{"lineáris hasítás"}
+\end{figure}
+
+\pagebreak
+
+\subsection{Bitmap index}
+
+\begin{outline}
+	\1 Olyan oszlopokhoz hatékony, amelyekben kevés különböző érték található
+	\1 Bitmap minden sorában pontosan egy '1' szerepel
+\end{outline}
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Empno} & \textbf{Status} & \textbf{Region} & \textbf{Gender} \\
+			\hline
+			101 & single & east & male \\
+			\hline
+			102 & married & central & female \\
+			\hline
+			103 & married & west & female \\
+			\hline
+			104 & divorced & west & male \\
+			\hline
+		\end{tabular}
+		\captionsetup{labelformat=empty}
+		\caption{Tábla, amihez bitmap index lesz}
+	\end{minipage}%
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\begin{tabular}{|c|c|c|}
+			\hline
+			$\stackrel{\text{Region=}}{\text{east}}$ & $\stackrel{\text{Region=}}{\text{central}}$ & $\stackrel{\text{Region=}}{\text{west}}$ \\
+			\hline
+			1 & 0 & 0 \\
+			\hline
+			0 & 1 & 0 \\
+			\hline
+			0 & 0 & 1 \\
+			\hline
+			0 & 0 & 1 \\
+			\hline
+		\end{tabular}
+		\captionsetup{labelformat=empty}
+		\caption{Bitmap index \textit{Region} oszlopra}
+	\end{minipage}
+\end{figure}
+
+\subsubsection{Lekérdezés bitmap segítségével}
+
+\begin{outline}
+	\1 Lekérdezés feltételek logikai műveletekké alakíthatóak
+	\1 Lekérdezés: \texttt{SELECT COUNT(*) FROM CUSTOMER WHERE STATUS='married' AND REGION IN ('central', 'west');}
+\end{outline}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|c|c|c|c|c|c|c|c|c|c|c|}
+		\hline
+		$\stackrel{\text{status=}}{\text{married}}$ &  &
+		$\stackrel{\text{region=}}{\text{central}}$ &  &
+		$\stackrel{\text{region=}}{\text{west}}$ &  &  &  &  &  &  \\
+		\hline
+		0 &     & 0 &    & 0 &   & 0 &     & 0 &   & 0 \\
+		\hline
+		1 & AND & 1 & OR & 0 & = & 1 & AND & 1 & = & 1 \\
+		\hline
+		1 &     & 0 &    & 1 &   & 1 &     & 1 &   & 1 \\
+		\hline
+		0 &     & 0 &    & 1 &   & 0 &     & 1 &   & 0 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{outline}
+	\1 Az eredmény az utolsó oszlopban az egyesek száma.
+\end{outline}
+
+\pagebreak
+
+\subsection{Szakaszhossz kódolás}
+
+\begin{outline}
+	\1 Cél: bitmap-ek tömörítése (ahol ritka az 1-es érték)
+	
+\end{outline}
+
+\subsubsection{Enkódolás, tömörítés}
+
+\begin{outline}
+	\1 1. lépés: minden '1' után vágás, ez alkot egy szakaszt
+	\1 2. lépés: szakaszban lévő '0'-k megszámolása
+	\1 3. lépés: $C$ := előző érték felírása 2-es számrendszerbe
+	\1 4. lépés: $D$ := bináris számban helyi értékek megszámolása
+	\1 Részeredmény: $D-1$ db '1' + $1$ db '0' + $C$
+		\2 Teljes eredményhez a többi szakaszt is kódoljuk
+		\2 Részeredményeket írjuk egymás után
+	\1 Példa: $...|000001|... \to 5 \text{db '0'} \to 101_2 \to 3 \text{ számjegy} \to 11|0|101$
+	\1 Ha az utolsó szakasz nem '1'-re végződik: nem tároljuk a záró '0'-kat
+	\1 Két '1' egymás után: nem gond, $00$-ként van kódolva
+\end{outline}
+
+\subsubsection{Dekódolás, visszafejtés}
+
+\begin{outline}
+	\1 1. lépés: $A$ := elején lévő '1' karakterek száma
+	\1 2. lépés: következő karakter ('0') kiolvasása
+	\1 3. lépés: $C$ := $A+1$ db karakter bináris számként értelmezése
+	\1 Részeredmény: $C$ db '0'-t követ egy '1'-es
+		\2 Teljes eredményhez a többi szakaszt is dekódoljuk
+		\2 Részeredményeket írjuk egymás után
+	\1 Példa: $in=110101... \to 2\text{db '1'} \wedge in=0|101|... \to 5_{10} \to 000001$
+\end{outline}
+
+\subsubsection{Hosszabb példa}
+
+\begin{outline}
+	\1 Eredeti: $0000000000000110001$
+		\2 13, 0, illetve 3 darab '0' található szakaszonként
+	\1 Kódolt: $1110\textbf{1101}0\textbf{0}10\textbf{11}$
+		\2 '0'-k bináris darabszáma vastag betűvel van szedve
+\end{outline}
+
+\subsection{Naplózás: napló alapján helyreállítás}
+
+\subsubsection{UNDO naplózás}
+
+\begin{outline}
+	\1 Mely tranzakciókat kell vizsgálni, ha ilyen bejegyezéssel találkozunk?
+		\2 <END CKPT> $\implies$ <START CKPT(...)> után kezdődőekkel
+		\2 <START CKPT(T1,...)> $\implies$ T1 és utána kezdődőekkel
+		\2 Egyik sincs a naplóban $\implies$ összes
+	\1 Kezelendő tranzakciók: nincsen <T COMMIT>
+	\1 Helyreállítás: naplón visszafelé haladunk
+		\2 <T,X,v> $\implies$ <T,X,v>
+		\2 <T START> $\implies$ <T ABORT>
+	\1 Magyarázat:
+		\2 <T COMMIT> a módosítások lemezre írása után egyből kiíródik
+		\2 CKPT(...) során a felsorolt tranzakciók <T COMMIT>-jára várunk
+		\2 <START CKPT(...)>-ban fel nem soroltakhoz már van <T COMMIT>
+\end{outline}
+
+\subsubsection{REDO naplózás}
+
+\begin{outline}
+	\1 Mely tranzakciókat kell vizsgálni, ha ilyen bejegyezéssel találkozunk?
+		\2 <END CKPT> $\implies$ START-ban felsoroltak közül legkorábbitól
+		\2 Nincs a naplóban $\implies$ összes
+	\1 Kezelendő tranzakciók: van <T COMMIT> de nincs <T END>
+		\2 Ha nincs <T COMMIT> se, akkor csak <T ABORT> kell
+	\1 Helyreállítás:
+		\2 Naplón előrefelé haladunk; <T,X,v> $\implies$ <T,X,v>
+		\2 Napló végén minden ilyen T-hez: <T END>
+	\1 Magyarázat:
+		\2 <T COMMIT> a módosítások lemezre írása előtt kerül a lemezre
+		\2 CKPT(...) során a fel nem soroltak lemezre írására várunk
+			\3 Felsoroltakhoz még nincsen <T COMMIT>, többihez van
+\end{outline}
+
+\pagebreak
+
+\subsubsection{UNDO/REDO naplózás}
+
+\begin{outline}
+	\1 Az UNDO és a REDO lépés független tudtommal: nincs sorrend köztük
+	\1 UNDO:
+		\2 Elég ezeket a tranzakciókat vizsgálni:
+			\3 <END CKPT> $\implies$ <START CKPT(...)> után kezdődőekkel
+			\3 <START CKPT(T1,...)> $\implies$ T1 és utána kezdődőekkel
+			\3 Nincs a naplóban $\implies$ összes
+		\2 Kezelendő tranzakciók: nincs <T COMMIT>
+		\2 Naplón visszafelé haladunk
+			\3 <T,X,v,w> $\implies$ <T,X,v>
+			\3 <T START> $\implies$ <T ABORT>
+	\1 REDO:
+		\2 Elég ezeket a tranzakciókat vizsgálni:
+			\3 <END CKPT> $\implies$ START-ban felsoroltak közül legkorábbitól
+			\3 Nincs a naplóban $\implies$ összes
+		\2 Kezelendő tranzakciók: van <T COMMIT>, nincs <T END>
+		\2 Naplón előrefelé haladunk:
+			\3 <T,X,v,w> $\implies$ <T,X,w>
+		\2 Napló végén minden ilyen T-hez: <T END>
+	\1 Magyarázat:
+		\2 <T COMMIT> kiadható lemezre írás előtt és után is
+		\2 CKPT(...) során az összes módosítás lemezre írására várunk
+		\2 CKPT(...) felsoroltjaihoz nincsen <T COMMIT>, többihez van
+\end{outline}
+
+\subsubsection{Appendix}
+
+Amikor ez a jegyzet azt mondja, hogy \texttt{<T,X,v>}-t kell a ZH-n a lapra írni, akkor a valóságban ezt kéne csinálni: \texttt{WRITE(X,v); OUTPUT(X)}. Legalábbis az előadás diák szerint.
+
+\pagebreak
+
+\subsection{Megelőzési gráf}
+
+\begin{outline}
+	\1 $T_i$-ből mutat nyíl $T_j$-be, ha $T_i$-nek meg kell előzni $T_j$-t
+		\2 Konfliktus-sorbarendezhető az ütemezés, ha a gráf körmentes
+	\1 Táblázatot készítünk segítségül:
+		\2 Motiváció: jobban olvasható, mintha egy sorban lenne minden
+		\2 Oszlopok: tranzakciók
+		\2 Soronként egy cella van kitöltve: egy tranzakcióhoz tartozó művelet
+		\2 Sorok fentről lefelé vannak feltöltve sorban az ütemezés műveleteivel
+	\1 Táblázat használata:
+		\2 Csak lefelé vizsgálódunk, és csak eltérő oszlopokban
+		\2 Ha $T_i$ egy művelete konfliktusban van egy tőle lejjebb található $T_j$ egy műveletével, akkor $T_i$-ből mutasson egy nyíl $T_j$-be
+	\1 Konfliktuspárok: $w_i(X);w_j(X)$ és $r_i(X);w_j(X)$
+\end{outline}
+
+\begin{figure}[h!]
+	\centering
+	\begin{minipage}{0.5\textwidth}
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		1 & 2 & 3 & 4 \\
+		\hline
+		$r_1(A)$ & & & \\
+		\hline
+		& $r_2(A)$ & & \\
+		\hline
+		& & $r_3(B)$ & \\
+		\hline
+		& & & $r_4(B)$ \\
+		\hline
+		& & $w_3(B)$ & \\
+		\hline
+		& & & $w_4(B)$ \\
+		\hline
+		$w_1(B)$ & & & \\
+		\hline
+		& $w_2(B)$ & & \\
+		\hline
+	\end{tabular}
+	\end{minipage}%
+	\begin{minipage}{0.5\textwidth}
+		\centering
+		\includegraphics[width=0.75\linewidth]{"megelőzési-gráf"}
+	\end{minipage}
+\end{figure}
+
+\begin{outline}
+	\1 Az eredeti ütemezés:\\
+	$r_1(A);r_2(A);r_3(B);r_4(B);w_3(B);w_4(B);w_1(A);w_2(B)$
+\end{outline}
+
+\pagebreak
+
+\subsection{Tábla összekapcsolás költségbecslés}
+
+\begin{outline}
+	\1 Memória és táblák méretei: $M$, $B_R$, $B_S$ blokk
+	\1 Táblákban található rekordok száma: $N_R$, $N_S$ darab
+\end{outline}
+
+\subsubsection{Blokk-skatulyázott ciklusos (block-nested loop)}
+
+\begin{outline}
+	\1 Költség: $\lceil \frac{B_R}{M-1} \rceil * B_S + B_R$
+		\2 Akkor lesz kevesebb, ha $B_R < B_S$
+	\1 Algoritmus: beolvasunk $M-1$ blokkot az egyik táblából, a másikat pedig blokkonként végigolvassuk. Utána a következő $M-1$ blokkot olvassuk be az első táblából, stb.
+\end{outline}
+
+\subsubsection{Indexelt skatulyázott ciklusos}
+
+\begin{outline}
+	\1 Költség: $B_R+N_R*c$
+		\2 Ahol $c$ az $S$ táblából az index szerinti kiválasztás költsége
+			\3 $c$ értéke állítólag az $S$ tábla vizsgált oszlopán található különböző értékek száma, azaz $c=SC(S,A)=\frac{N_S}{V(S,A)}$
+		\2 Akkor lesz kevesebb a költség, ha $N_R < N_S$
+	\1 Algoritmus: beolvasunk $R$-ből egy blokkot, index segítségével megtaláljuk a megfelelő $S$ rekordokat, majd beolvassuk a következő blokkot $R$-ből.
+\end{outline}
+
+\subsubsection{Rendezéses-összefésüléses}
+
+\begin{outline}
+	\1 Költség: $2 * B_R * (1 + \lceil \log_{M-1} (\frac{B_R}{M}) \rceil) + 2 * B_S * (1 + \lceil \log_{M-1} (\frac{B_S}{M}) \rceil) + B_R + B_S$
+	\1 Rendező algoritmus: először a táblát memóriában elférő rendezett partíciókra osztjuk, azután futamonként $M-1$ darab ilyen partíciót rendezünk, ezzel egy újabb partíciót készítve. Legvégén fájlba beírjuk.
+	\1 Összekapcsoló algoritmus: két rendezett táblát párhuzamosan olvassuk.
+\end{outline}
+
+\subsubsection{Hasításos}
+
+\begin{outline}
+	\1 Költség: $3*B_R + 3*B_S$
+	\1 Algoritmus: rekordokat beolvassuk, hash függvényt alkalmazunk az összekapcsolási mezőre és így kosarakba (partíciókba) írjuk őket. Majd a megfelelő kosár párokat kiolvassuk és összekapcsoljuk.
+\end{outline}
+
+\end{document}

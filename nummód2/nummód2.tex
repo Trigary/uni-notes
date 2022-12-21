@@ -1,0 +1,773 @@
+% !TeX spellcheck = hu_HU
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{cmap}
+\usepackage[T1]{fontenc}
+\usepackage[magyar]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+
+\usepackage{outlines}
+\usepackage{hyperref}
+
+\hyphenpenalty=10000
+
+\begin{document}
+
+\begin{center}
+	\huge
+	Numerikus módszerek II\\
+	\vspace{1mm}
+	\LARGE
+	Gyakorlat jegyzet és elméleti kérdések kidolgozása\\
+	\vspace{5mm}
+	\large
+	Készült Bozsik József előadásai és gyakorlatai alapján\\
+	\vspace{5mm}
+	Sárközi Gergő, 2022-23-1. félév\\
+	Nincsen lektorálva!
+\end{center}
+
+\tableofcontents
+
+\pagebreak
+
+\section{Interpoláció}
+
+\subsection{Lagrange interpoláció}
+
+\begin{outline}
+	\1 Legyenek $x_0,...x_n$ alappontok és $y_0,...,y_n$ függvényértékek
+	\1 Lagrange-alappolinom: $\ell_k(x) = \Pi_{j=0,j \ne k}^n \frac{x-x_j}{x_k-x_j}$ ahol $0 \le k \le n$
+		\2 $x$-es zárójelek (számláló) felbontása nem elvárás
+		\2 $\ell_k(x_i)$ csak akkor nem 0 (hanem 1), ha $i=k$
+	\1 Lagrange-alak: $L_n(x) = \sum_{k=0}^n y_k \ell_k(x)$
+		\2 Alsó index jelentése: fokszám
+\end{outline}
+
+\subsection{Interpoláció hibabecslés, hibaformula}
+
+\begin{outline}
+	\1 Legyen $f$ az eredeti függvény és $p_n$ az interpolációs polinom
+	\1 Legyen $[a;b]$ az $x_0,...,x_n$ és az $x$ pontok által kifeszített intervallum
+	\1 Hibabecslés $x$ pontban: $|f(x)-p_n(x)| \le \frac{M_{n+1}}{(n+1)!}*|\omega_n(x)|$
+		\2 $M_{n+1} = \max_{\xi \in [a;b]} |f^{(n+1)}(\xi)|$, azaz az eredeti függvény $n+1$-edik deriváltjának a maximuma az $[a;b]$ intervallumon
+		\2 $\omega_n(x) = \Pi_{j=0}^n (x-x_j)$
+		\2 $x=x_i$ esetén, azaz alappontban, a hiba 0
+	\1 Hibabecslés $[a;b]$ intervallumon: $|f(x)-p_n(x)| \le \frac{M_{n+1}}{(n+1)!}*|\omega_n(x)|$
+		\2 $|\omega_n(x)|$-re felső becslés kell:
+			\3 Deriváljuk és keressük meg a gyököket
+			\3 Gyökökhöz tartozó behelyettesítési értéket számoljuk ki
+			\3 Válasszuk ki az abszolút értékben legnagyobb értéket
+			\3 Nem baj, ha $[a;b]$-n kívülre esnek, stb., ez így jó
+\end{outline}
+
+\pagebreak
+
+\subsection{Osztott differencia}
+
+\begin{outline}
+	\1 Elsőrendű osztott differencia: $f[x_i,x_{i+1}] = \frac{f(x_{i+1})-f(x_i)}{x_{i+1} - x_i}$
+	\1 k-adrendű osztott differencia:
+	$f[x_i,...,x_{i+k}] = \frac{f[x_{i+1},...,x_{i+k}] - f[x_i,...,x_{i+k-1}]}{x_{i+k} - x_i}$
+\end{outline}
+
+\begin{table}[h!]
+	\centering
+	\begin{tabular}{|c|c|c|c|}
+		\hline
+		$x_i$ & $y_i$ & $f[x_1;x_{i+1}]$ & $f[x_i;x_{i+1};x_{i+2}]$ \\
+		\hline
+		1 & 1 & & \\
+		\hline
+		4 & 2 & $\frac{2-1}{4-1} = \frac{1}{3}$ & \\
+		\hline
+		9 & 3 & $\frac{3-2}{9-4} = \frac{1}{5}$ & $\frac{1/5 - 1/3}{9 - 1} = \frac{-1}{60}$ \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{outline}
+	\1 Új alappont esetén az osztott differencia táblázatot legalul bővítjük
+	\1 Számláló ($a-b$) számolása:
+		\2 Első tag ($a$): balra vízszintesen az első érték ($y_i$ vagy $f[...]$)
+		\2 Második tag ($b$): bal felfelé átlósan az első érték ($y_i$ vagy $f[...]$)
+	\1 Nevező ($a-b$) számolása:
+		\2 Első tag ($a$): sor $x_i$ értéke, avagy balra első cella $a$ értéke
+		\2 Második tag ($b$): bal felfelé átlósan az $y_i$ oszlopig és ott az $x_i$
+			\3 Avagy bal felfelé átlósan az első cella $b$ értéke
+\end{outline}
+
+\subsection{Newton interpoláció}
+
+\begin{outline}
+	\1 $N_n(x) = f(x_0) + \sum_{k=1}^n f[x_0,...,x_k] * \omega_{k-1}(x)$
+		\2 Azonos alappontok esetén $L_n$-nel azonos végeredmény
+		\2 Új alapponthoz: $N_{n+1}(x) = N_n(x) + f[x_0,...,x_{n+1}] * \omega_{n}(x)$
+		\2 $\omega_n$ definíciója: lásd hibabecslés, hibaformula
+	\1 A nullával megszorzott tagokat is kötelező felírni
+	\1 Zárójeleket nem kötelező felbontani
+\end{outline}
+
+\pagebreak
+
+\subsection{Csebisev polinomok}
+
+\begin{outline}
+	\1 Cél: hiba minimalizálása optimális alappontok választásával
+	\1 $n$-ed fokú Csebisev polinom $\implies$ $n$ db gyök (alappont)
+		\2 Gyökök 0-ra szimmetrikusak
+	\1 Optimális alappontok meghatározása:
+		\2 A polinomot a rekurzív képlettel állítjuk elő:\\
+		$T_0(x) = 1$ \;\;és\;\; $T_1(x) = x$ \;\;és\;\; $T_{n+1}(x) = 2x*T_n(x) - T_{n-1}(x)$
+			\3 $x_0,...,x_n$ alappontok esetén $T_n(x)$-et kell előállítani
+		\2 Kiszámoljuk a polinom gyökeit
+		\2 Ha nem a $[-1;1]$ intervallumon dolgozunk: transzformálni kell
+			\3 $\varphi(x) = \frac{b-a}{2}x+\frac{a+b}{2}$ \;\; ahol $x$ egy gyök
+	\1 Gyökök megadása közvetlenül:
+		\2 $[-1;1]$ intervallum esetén: $x_k = \cos(\frac{2k+1}{2n}\pi)$ ahol $0 \le k \le n-1$
+		\2 Másik intervallumra transzformálás: lásd feljebb
+	\1 Hibabecslés az optimális alappontokra épített interpolációra:
+		\2 A képlet nem változik: $|f(x)-p_n(x)| \le \frac{M_{n+1}}{(n+1)!}*|\omega_n(x)|$
+		\2 $M_{n+1}$ továbbra is az eredeti függvény $n+1$-edik deriváltjának a maximuma az $[a;b]$ intervallumon
+		\2 Ha $[a;b]=[-1;1]$ akkor $|\omega_n(x)|=\frac{1}{2^n}$
+		\2 Ha $[a;b] \ne [-1;1]$ akkor $|\omega_n(x)|=\frac{1}{2^n} * (\frac{b-a}{2})^{n+1}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Hermite interpoláció}
+
+\begin{outline}
+	\1 Newton interpoláció pár különbséggel
+	\1 Alappontokat annyiszor vesszük ($m_i$ multiplicitás), ahány deriváltját ismerjük (plusz a deriválás nélküli változat)
+		\2 Ezeket kötelező közvetlenül egymás után írni a táblázatba
+	\1 Osztott differencia azonos alappontok esetén:\\
+	$f[x_i,...,x_i] = f[x_i \text{ k-szor}] = f^{(k)}(x_i) \;/\; k!$
+	\1 Hibabecslés: $\omega_m$ helyett $\Omega_m = \Pi_{i=0}^k (x-x_i)^{m_i}$
+		\2 Azaz gyakorlatilag ugyan az: multiplicitás-szor vesszük bele
+	\1 Hézagos interpoláció nem lehetséges: nem működik a Hermite,\\
+	ha $f^{(k)}(x)$-et ismerjük, de $f^{(k-1)}(x)$-et nem
+		\2 Ilyenkor határozatlan együtthatók módszere alkalmazható
+	\1 Fejér-Hermite interpoláció: minden multiplicitás 2 ($f(x)$ és $f'(x)$ ismert)
+		\2 Ilyenkor hibabecslésnél a négyzetre emelés kiemelhető és egy segédfüggvényt elég deriválni a szélsőérték kereséshez
+			\3 Példa: $(x(x-1))^2 \implies g(x) := x(x-1)$ szélsőértéke elég
+\end{outline}
+
+\pagebreak
+
+\subsection{Spline interpoláció}
+
+\subsubsection{Spline interpoláció}
+
+\begin{outline}
+	\1 Részintervallumonként polinomok:\\
+	$p_k(x) = \sum_{j=0}^\ell a_j^{(k)} * (x - x_{k-1})^j$ ahol $x \in l_k$
+	\1 Megoldás alakja: $S(x) = \begin{cases}
+		P_1(x) = a_0^{(1)} + a_1^{(1)}(x-x_0) + ... & x \in [x_0;x_1] \\
+		P_2(x) = a_0^{(2)} + a_1^{(2)}(x-x_1) + ... \\
+		...
+	\end{cases}$
+	\1 Szerintem ezt az előbbi kettőt soha nem hasznákjuk
+\end{outline}
+
+\subsubsection{Spline interpoláció intervallumonkénti interpolációval}
+
+\begin{outline}	
+	\1 Elsőfokú spline $\implies$ Lagrange/Newton interpoláció minden intervallumon
+		\2 Csak az alappontokra és a helyettesítési értékre van szükségünk
+	\1 Másodfokú spline $\implies$ Hermite interpoláció minden intervallumon
+		\2 Előzőeken felül szükségünk van egy deriváltra, pl. $S'(x_0)$-ra
+		\2 Minden intervallumon kell egy derivált, ehhez felhasználható:\\
+		$P'_k(x) = P'_{k+1}(x)$ ahol $P_k$-t deriválnunk kell és $x=x_k$ helyettesítéssel megkapjuk a keresett hiányzó deriváltat a következő intervallumhoz
+			\3 Lehet, hogy $P'_{k+1}$-et ismerjük és ebből kell $P'_k$-t kiszámolni
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Spline interpoláció egyenletrendszer megoldásával}
+
+\begin{outline}
+	\1 Például $x_j = 0$ esetén lehet jó megoldási módszer
+	\1 Megoldás alakja: $S(x) = \begin{cases}
+		P_1(x) = a_1x^2 + b_1x + c_1 + ... & x \in [x_0;x_1] \\
+		P_2(x) = a_2x^2 + b_2x + c_2 + ... & x \in [x_1;x_2] \\
+		...
+	\end{cases}$
+	\1 Interpolációs feltételek: $S(x_k)=P_{k}(x_k)=P_{k+1}(x_k)=y_k$
+		\2 $P_k$ vagy $P_{k+1}$ nem létezik a két szélsó $x_k$ érték esetén
+		\2 Szóban: intervallumok találkozásánál $P_i(x)$ értékek megegyeznek\\
+		és a kapott $(x_i,y_i)$ párokra illeszkedik a polinom
+	\1 Belső pontokban simasági feltételek: $P^{(l)}_k(x_k) = P^{(l)}_{k+1}(x_k)$
+		ahol $1 \le l < \ell$
+		\2 Szóban: intervallumok találkozásánál derivált értékek megegyeznek
+		\2 Másodfokúnál első-, harmadfokúnál első- és másodfokú derivált
+	\1 Peremfeltétel: kétféle létezik, az egyiket kell használni (feladat mondja)
+		\2 Hermite-féle peremfeltétel: legalább másodfokú spline esetén
+			\3 Feltétel: $P'_1(a)=f'(a)$ és $P'_n(b)=f'(b)$
+			\3 Szóban: két legszélén deriváltak eredeti függvényével egyeznek
+			\3 Akkor is működhet, ha nem ismerjük mindkét $f'(x)$ értéket
+		\2 Természetesen peremfeltétel: legalább harmadfokú spline esetén
+			\3 Feltétel: $P''_1(a)=0$ és $P''_n(b)=0$
+\end{outline}
+
+\subsubsection{Spline globális bázisban}
+
+\begin{outline}
+	\1 Ahányad fokú a spline, annyi $x^k$ bázis elem kell (pl. $2 \implies 1,x,x^2$)
+	\1 Két szélső alappont elhagyásával a maradék bázis elemek,\\
+	pl. harmadfokú spline és $1,2,3,4,5 \implies (x-2)^3_+, (x-3)^3_+, (x-4)^3_+$
+	\1 Megoldást más alapban keressük:
+	$S(x) = \alpha_0 + \alpha_1x + ... + \beta(x-x_1)^\ell_+ + ...$
+		\2 Egyenletrendszer megoldásával ugyan úgy megoldható
+		\2 $(x-x_k)^\ell_+ = 0$, ha $x < x_k$ (egyébként pedig simán számolandó)
+		\2 Azaz intervallumonként mindig egy újabb $(x-x_k)^\ell_+$ jön be
+\end{outline}
+
+\subsection{B-Spline interpoláció}
+
+\begin{outline}
+	\1 $h$: alappontok ($x_i$ és $x_{i+1}$) távolsága
+	\1 $\ell$: fokszám, ennél 2-vel több alappontra támaszkodik minden "komponens"
+	\1 $B_{a,b}$ jelölés: első szám a fokszám, második a legbaloldalibb alappont
+		\2 Ezeknek az értékét valójában csak alappont $x$-ek esetén kell tudni
+	\1 $B_{1,i}(x) = \frac{1}{h} \begin{cases}
+		x-x_i & \text{ha } x \in [x_i,x_{i+1}] \\
+		x_{i+2}-x & \text{ha } x \in [x_{i+1},x_{i+2}] \\
+		0 & \text{különben}
+	\end{cases}$
+		\2 Ha $x$ egy alappont: $B_{1,i}(x_k) = \begin{cases}
+			1 & \text{ha } k = i + 1 \\
+			0 & \text{különben}
+		\end{cases}$
+	\1 $B_{2,i}(x) = \frac{1}{2h^2} \begin{cases}
+		(x-x_i)^2 & \text{ha } x \in [x_i,x_{i+1}] \\
+		h^2 + 2h(x-x_{i+1}) - 2(x-x_{i+1})^2 & \text{ha } x \in [x_{i+1},x_{i+2}] \\
+		(x_{i+3}-x)^2 & \text{ha } x \in [x_{i+2},x_{i+3}] \\
+		0 & \text{különben}
+	\end{cases}$
+		\2 Ha $x$ egy alappont: $B_{2,i}(x_k) = \begin{cases}
+			1/2 & \text{ha } k = i + 1 \text{ vagy } k = i + 2 \\
+			0 & \text{különben}
+		\end{cases}$
+		\2 Ha $x$ egy alappont: $B'_{2,i}(x_k) = \begin{cases}
+			1/h & \text{ha } k = i + 1 \\
+			-1/h & \text{ha } k = i + 2 \\
+			0 & \text{különben}
+		\end{cases}$
+\pagebreak
+	\1 $B_{3,i}(x) = \frac{1}{6h^3} \begin{cases}
+		(x-x_i)^3 & \text{ha } x \in [x_i,x_{i+1}] \\
+		h^3 + 3h^2(x-x_{i+1}) + 3h(x-x_{i+1})^2 - 3(x-x_{i+1})^3 & \text{ha } x \in [x_{i+1},x_{i+2}] \\
+		h^3 + 3h^2(x_{i+3}-x) + 3h(x_{i+3}-x)^2 - 3(x_{i+3}-x)^3 & \text{ha } x \in [x_{i+2},x_{i+3}] \\
+		(x_{i+4}-x)^3 & \text{ha } x \in [x_{i+3},x_{i+4}] \\
+		0 & \text{különben}
+	\end{cases}$
+		\2 Ha $x$ egy alappont: $B_{3,i}(x_k) = \begin{cases}
+			1/6 & \text{ha } k = i + 1 \\
+			4/6 & \text{ha } k = i + 2 \\
+			1/6 & \text{ha } k = i + 3 \\
+			0 & \text{különben}
+		\end{cases}$
+		\2 Ha $x$ egy alappont: $B'_{3,i}(x_k) = \begin{cases}
+			1/2h & \text{ha } k = i + 1 \\
+			0 & \text{ha } k = i + 2 \\
+			-1/2h & \text{ha } k = i + 3 \\
+			0 & \text{különben}
+		\end{cases}$
+		\2 Ha $x$ egy alappont: $B''_{3,i}(x_k) = \begin{cases}
+			1/h^2 & \text{ha } k = i + 1 \\
+			-2/h^2 & \text{ha } k = i + 2 \\
+			1/h^2 & \text{ha } k = i + 3 \\
+			0 & \text{különben}
+		\end{cases}$
+\end{outline}
+
+\subsubsection{Spline interpoláció B-Spline-okból}
+
+\begin{outline}
+	\1 $f(x_i) = S_\ell(x_i) = \sum_{k=-\ell}^{n-1} c_k * B_{\ell,k}(x_i)$
+		\2 Ebből kiszámíthatóak a $c_k$ értékek alappontok behelyettesítésével
+\end{outline}
+
+\pagebreak
+
+\section{Approximáció}
+
+\subsection{Általánosított inverz}
+
+\begin{outline}
+	\1 Teljes rangú $\Leftrightarrow$ oszlopok lineáris függetlenek
+		\2 Azaz ha lineáris kombinációjuk csak $\forall i: \lambda_i=0$ esetben nullvektor
+	\1 Túlhatározott teljes rangú eset: $A^+ = (A^TA)^{-1}A^T$
+		\2 Akkor túlhatározott, ha több sor van, mint oszlop
+	\1 Alulhatározott teljes rangú eset: $A^+ = A^T(AA^T)^{-1}$
+		\2 Akkor alulhatározott, ha kevesebb sor van, mint oszlop
+\end{outline}
+
+\subsection{Legkisebb négyzetek módszere}
+
+\begin{outline}
+	\1 Legyen $N$ a függvényértékek száma és $n$ a keresett polinom fokszáma
+	\1 Ezt kell meghatározni: $p_n(x) = a_nx^n + ... + a_1x + a_0$
+		\2 Ez a négyzetesen legjobban közelítő polinom
+	\1 Ez legyen minimális: $\sum_{i=1}^{N} (y_i - p_n(x_i))^2$
+	\1 Feltétel: $N>n$
+\end{outline}
+
+\subsubsection{Megoldás Gauss-féle normálegyenlettel}
+
+$$
+\begin{bmatrix}
+	\sum x_i^0 & \sum x_i^1 & \dots & \sum x_i^n \\
+	\sum x_i^1 & \sum x_i^2 & \dots & \sum x_i^{n+1} \\
+	\vdots & & & \vdots \\
+	\sum x_i^n & \sum x_i^{n+1} & \dots & \sum x_i^{2n}
+\end{bmatrix}
+*
+\begin{bmatrix} a_0 \\ a_1 \\ \vdots \\ a_n \end{bmatrix}
+=
+\begin{bmatrix} \sum x_i^0 y_i \\ \sum x_i^1 y_i \\ \vdots \\ \sum x_i^n y_i \end{bmatrix}
+$$
+
+\subsubsection{Négyzetesen legjobban közelítő egyenes}
+
+\begin{outline}
+	\1 $p_1(x) = a_1x + a_0$
+	\1 $\begin{bmatrix} N & \sum x_i \\ \sum x_i & \sum x_i^2 \\ \end{bmatrix}
+	* \begin{bmatrix} a_0 \\ a_1 \end{bmatrix}
+	= \begin{bmatrix} \sum y_i \\ \sum x_i y_i \end{bmatrix} $
+\end{outline}
+
+\pagebreak
+
+\subsection{Hilbert-tér}
+
+\begin{outline}
+	\1 $H = \mathbb{R}^3$ vagy hasonló Hilbert tér
+	\1 $f$ a közelíteni kívánt Hilbert térbeli elem (pont)
+	\1 $H' = \{ \dots \;|\; \dots \}$ a valami által generált altér
+		\2 Dimenziószám: szabad változók száma mínusz egyenletek száma
+			\3 Egy dimenziós példa: $\{ c * v \;|\; c \in \mathbb{R} \}$ ahol $v$ az adott irányvektora egy origón átmenő egyenesnek
+			\3 Két dimenziós példa: $\{(x,y,z)^T \in \mathbb{R}^3 \;|\; 2x+y-z=0 \}$
+		\2 Dimenziószám darab lineáris független $g_i$ kell az altérről
+			\3 Egy dimenziós altér esetén $g_1=v$ megfelelő
+	\1 $f' = \sum c_i g_i$ a legjobban közelítő elem
+		\2 $c_i$ értékek kiszámítása: $G*c=b$\\
+		$\begin{bmatrix}
+			<g_1;g_1> & <g_2;g_1> & ... \\
+			<g_1;g_2> & <g_2;g_2> & ... \\
+			... & ... & ...
+		\end{bmatrix} * \begin{bmatrix}
+			c_1 \\ c_2 \\ ...
+		\end{bmatrix} = \begin{bmatrix}
+			<f;g_1> \\ <f;g_2> \\ ...
+		\end{bmatrix}$
+	\1 Legjobban közelítő elem távolsága altértől: $d = ||f''||_2 = ||f-f'||_2$
+		\2 $||x||_2$ jelentése: euklideszi norma
+	\1 Altérre vonatkozó tükörkép: $f^T = f - 2*f'' = f' - f''$
+\end{outline}
+
+\pagebreak
+
+\subsection{Polinom paraméterek, amelyre egy integrál minimális}
+
+\begin{outline}
+	\1 Feladat: mely $a,b,c,...$ esetén lesz $\int_{\alpha}^{\beta} (... + x^3 + ax^2 + bx + c)^2 * w(x) dx$ minimális, ahol a $w(x)$ függvény és $\alpha,\beta$ ismert
+		\2 Azaz a főegyüttható ismert (például 1)
+	\1 Megoldás: a $w(x)$, $\alpha$ és $\beta$ alapján egy megfelelő polinomot kell konstruálni
+		\2 Ezt megszorozzuk, hogy a főegyütthatója megegyezzen a feladatban látott értékkel
+			\3 Ha eddig $P_n(x)$ volt a polinom, akkor hívjuk $\widetilde{P}_n(x)$-nek
+		\2 Utána csak ki kell olvasni a többi együtthatót
+\end{outline}
+
+\subsubsection{Klasszikus ortogonális polinomok}
+
+\begin{outline}
+	\1 Legendre polinom: $[\alpha;\beta]=[-1;1]$, $w(x) \equiv 1$
+		\2 $P_0(x) = 1$, $P_1(x) = x$
+		\2 $P_{n+1}(x) = \frac{2n+1}{n+1}x * P_n(x) - \frac{n}{n+1} * P_{n-1}(x)$
+	\1 Csebisev 1. fajú polinom: $[-1;1]$, $w(x) \equiv 1/\sqrt{1-x^2}$
+		\2 $T_0(x) = 1$, $T_1(x) = x$
+		\2 $T_{n+1}(x) = 2x * T_n(x) - T_{n-1}(x)$
+	\1 Csebisev 2. fajú polinom: $[-1;1]$, $w(x) \equiv \sqrt{1-x^2}$
+		\2 $U_0(x) = 1$, $U_1(x) = 2x$
+		\2 $U_{n+1}(x) = 2x * U_n(x) - U_{n-1}(x)$
+	\1 Ez nincs a példatárban: Hermite polinom: $(-\infty;+\infty)$, $w(x) \equiv e^{-x^2}$
+		\2 $H_0(x) = 1$, $H_1(x) = 2x$
+		\2 $H_{n+1}(x) = 2x * H_n(x) - 2n* H_{n-1}(x)$
+	\1 Ez nincs a példatárban: Laguerre polinom: $(0;+\infty)$, $w(x) \equiv e^{-x}$
+		\2 $P_0(x) = 1$, $P_1(x) = x-1$
+		\2 $P_{n+1}(x) = (x-(2n+1))*P_n(x)-n^2*P_{n-1}(x)$
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Klasszikus ortogonális polinomok transzformációval}
+
+\begin{outline}
+	\1 Egy megfelelő $\varphi(x) = \dots$ függvény szükséges: $\varphi$ alkalmazva a klasszikus ortogonális polinom $\alpha,\beta$ értékére adja ki a feladat $\alpha,\beta$ értékét
+	\1 Ezután a klasszikus ortogonális polinomban $x$-et cseréljük ki $\varphi(x)$-re
+	\1 Ebből az új polinomból olvassuk le az együtthatókat
+		\2 Előtte a főegyütthatót egyeztessük
+		\2 Máshol már nem kell alkalmazni a $\varphi$ függvényt
+\end{outline}
+
+\subsubsection{Ortogonális polinomok, Gram-Schmidt-ortogonalizáció}
+
+\begin{outline}
+	\1 Bármely $\alpha$, $\beta$ és $w(x)$ esetén működik
+	\1 $\widetilde{p}_0(x) \equiv 1$
+	\1 $\widetilde{p}_k(x) = x^k - \sum_{j=0}^{k-1} c_j^{(k)} \widetilde{p}_j(x)$ ahol $c_j^{(k)}=\frac{\int_{\alpha}^{\beta} x^k * \widetilde{p}_j(x) * w(x) dx}
+	{\int_{\alpha}^{\beta} (\widetilde{p}_j(x))^2 * w(x) dx}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Numerikus integrálás}
+
+\begin{outline}
+	\1 Feladat: $\int_a^b f$ közelítő értékének meghatározása
+		\2 Megoldás: az egyik (a kért) formulának az alkalmazása
+	\1 Ha meg van adva a pontos érték, akkor lehet hibát számolni
+		\2 Megoldás: $M_k$ kiszámolása és hibaformula alkalmazása
+	\1 Feladat kérhető adott $m$-re összetett formula készítését
+		\2 Megoldás: az egyik (a kért) összetett formulának az alkalmazása
+	\1 Feladat kérdezheti $m$ szükséges értékét, hogy adott pontosság meglegyen
+		\2 Megoldás: összetett formula hibaformula egyenlet rendezése $m$-re
+\end{outline}
+
+\subsubsection{Formulák}
+
+\begin{outline}
+	\1 $M_k = ||f^{(k)}||_\infty$ jelentése: $f^{(k)}(x)$ maximuma $x \in [a;b]$ esetén
+	\1 Érintő formula
+		\2 $\int_a^b f \approx E(f) = (b-a) *f(\frac{a+b}{2})$
+		\2 Hiba: $\frac{(b-a)^3}{24} * ||f''||_\infty$
+	\1 Trapéz formula
+		\2 $\int_a^b f \approx T(f) = \frac{b-a}{2} * (f(a) + f(b))$
+			\3 Hiba: $\frac{(b-a)^3}{12} * ||f''||_\infty$
+		\2 Összetett: $T_m(f) = \frac{b-a}{2m} * (f(a) + 2\sum_{k=1}^{m-1} f(a+k*\frac{b-a}{m}) + f(b))$
+			\3 Hiba: $\frac{(b-a)^3}{12m^2} * ||f''||_\infty$
+	\1 Simpson formula
+		\2 $\int_a^b f \approx S(f) = \frac{b-a}{6} * (f(a) + 4 * f(\frac{a+b}{2}) + f(b))$
+			\3 Hiba: $\frac{(b-a)^5}{4! * 5!} *||f^{(4)}||_\infty$
+		\2 Öt.: $S_m(f) = \frac{b-a}{3m} (f(a) + 4 \sum_{k=1}^{m/2} f(x_{2k-1}) + 2 \sum_{k=1}^{m/2-1} f(x_{2k}) + f(b))$
+			\3 Hiba: $\frac{(b-a)^5}{180m^4} *||f^{(4)}||_\infty$
+\end{outline}
+
+\pagebreak
+
+\section{Elméleti kérdések}
+
+\subsection{Első ZH}
+
+\subsubsection{Definiálja az interpoláció feladatát! 2p.}
+
+Olyan max n-edfokú polinomot ($p_n$) keresünk, melyre $p_n(x_i)=y_i$ ahol $x_i$ különböző alappontok és $y_i$ függvényértékek ($x_i \in [a,b]$ és $0 \le i \le n$)
+
+\subsubsection{Definiálja a Lagrange-alappolinomokat! 2p.}
+
+$x_i$ alappontok esetén a Lagrange-alappolinomok: $\ell_k(x) = \Pi_{j=0,j \ne k}^n \frac{x-x_j}{x_k-x_j}$ ahol $0 \le k \le n$
+
+\subsubsection{Írja le a Lagrange-alappolinomok tulajdonságait! 2p.}
+
+\begin{outline}
+	\1 $\ell_k(x_i) = \delta_{ki} = \begin{cases}
+		1 \text{ ha } k=i\\
+		0 \text{ ha } k \ne i
+	\end{cases}$
+	\1 $\ell_k(x) = \frac{\omega_n(x)}{(x-x_k)w'_n(x_k)}$ ahol $w_n(x) = \Pi_{j=0}^n(x-x_j)$
+\end{outline}
+
+\subsubsection{Írja fel az interpolációs polinom Lagrange-alakját! 2p.}
+
+$p_n(x) \equiv L_n(x) = \sum_{k=0}^n y_k \ell_k(x)$
+
+\subsubsection{Milyen tételt tanult az interpoláció hibájáról? 4p.}
+
+\begin{outline}
+	\1 Legyen $x \in \mathbb{R}$ tetszőleges és $[a;b]$ az $x_0,...,x_n,x$ által kifeszített intervallum
+	\1 Legyen $f \in C^{n+1}[a;b]$
+	\1 Ekkor $\exists \xi_x \in [a;b]: f(x)-p_n(x)=\frac{f^{(n+1)}(\xi_x)}{(n+1)!}*\omega_n(x)$
+	\1 Hibabecslés: $|f(x)-p_n(x)| \le \frac{M_{n+1}}{(n+1)!}*|\omega_n(x)|$
+		\2 Ahol $M_{n+1} = \max_{\xi \in [a;b]} |f^{(n+1)}(\xi)|$
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Definiálja az elsőrendű és k-adrendű osztott differencia fogalmát! 2p.}
+
+\begin{outline}
+	\1 Elsőrendű osztott differencia: $f[x_i,x_{i+1}] = \frac{f(x_{i+1})-f(x_i)}{x_{i+1} - x_i}$
+	\;\; ($0 \le i \le n-1$)
+		\2 Rekurzívan számolható, ha nulladrendűt definiáljuk: $f[x_i] = f(x_i)$
+	\1 k-adrendű osztott differencia:
+	$f[x_i,...,x_{i+k}] = \frac{f[x_{i+1},...,x_{i+k}] - f[x_i,...,x_{i+k-1}]}{x_{i+k} - x_i}$\\
+	ahol $1 \le k \le n$ és $0 \le i \le n-k$
+\end{outline}
+
+\subsubsection{Írja fel az interpolációs polinom Newton-alakját! 2p.}
+
+$N_n(x) = f(x_0) + \sum_{k=1}^n f[x_0,...,x_k] * \omega_{k-1}(x) \equiv L_n(x)$
+
+\subsubsection{Írja fel a Newton-alak rekurzióját új alappont felvétele esetén! 2p.}
+
+$N_{n+1}(x) = N_n(x) + f[x_0,...,x_{n+1}] * \omega_{n}(x)$
+
+\subsubsection{Definiálja a Csebisev-polinomot! 2p.}
+
+n-edfokú, elsőfajú Csebisev-polinom: $T_n(x) = \cos(n*\arccos(x))$ ($x \in [-1;1]$)
+
+\subsubsection{Írja fel a Csebisev-polinomok rekurziós formuláját! 2p.}
+
+$T_0(x) = 1$ \;\;és\;\; $T_1(x) = x$ \;\;és\;\; $T_{n+1}(x) = 2x*T_n(x) - T_{n-1}(x)$
+
+\subsubsection{Írja fel az n-edfokú Csebisev-polinomok gyökeit! 1p.}
+
+$x_k = \cos(\frac{2k+1}{2n}\pi)$ ahol $0 \le k \le n-1$ \;\; (n db gyök, 0-ra szimmetrikus)
+
+\subsubsection{Írja fel a Csebisev-polinomok extremális tulajdonságáról tanult tételt! 2p.}
+
+$\min_{\widetilde{Q} \in P_n^{(1)}} ||\widetilde{Q}||_\infty = ||\widetilde{T}_n||_\infty = \frac{1}{2^{n-1}}$ ahol $||\widetilde{Q}||_\infty = \max_{x \in [-1;1]} |\widetilde{Q}(x)|$
+
+\pagebreak
+
+\subsubsection{Definiálja az Hermite-interpoláció feladatát! 3p.}
+
+\begin{outline}
+	\1 (Cél: magasabb deriváltakra is pontos legyen)
+	\1 Adott $x_0,...,x_k \in [a;b]$ különböző alappont
+	\1 Adott $y_0^{(j)},...,y_k^{(j)} \in \mathbb{R}$ függvény- és derivált értékek ($j=0,...,m_i-1$)
+		\2 Ahol $m_i \in \mathbb{N}$ a multiplicitás érték
+	\1 Legyen $m=\sum_{i=0}^{k} m_i - 1$
+	\1 Feladat: olyan $H_m$ polinom keresése, amelyre: $H_m^{(j)}(x_i) = y_i^{(j)}$
+		\2 Ahol $i=0,...,k$ és $j=0,...,m_i-1$
+\end{outline}
+
+\subsubsection{Milyen tételt tanult az Hermite-interpoláció hibájáról? 5p.}
+
+\begin{outline}
+	\1 Legyen $x \in \mathbb{R}$ tetszőleges és $[a;b]$ az $x_0,...,x_n,x$ által kifeszített intervallum
+	\1 Legyen $f \in C^{m+1}[a;b]$
+	\1 Ekkor $\exists \xi_x \in [a;b]: f(x)-H_m(x)=\frac{f^{(m+1)}(\xi_x)}{(m+1)!}*\Omega_m(x)$
+	\1 Hibabecslés: $|f(x)-H_m(x)| \le \frac{M_{m+1}}{(m+1)!}*|\Omega_m(x)|$
+		\2 Ahol $M_{m+1} = \max_{\xi \in [a;b]} |f^{(m+1)}(\xi)|$
+		\2 $\Omega_m(x) = \Pi_{i=0}^k (x-x_i)^{m_i}$
+\end{outline}
+
+\subsubsection{Definiálja a Fejér--Hermite-interpolációt! 2p.}
+
+Hermite-interpoláció speciális esete, ahol minden $m_i=2$. 
+
+\subsubsection{Hogyan definiáljuk azonos alappontok esetén az osztott differenciákat? 2p.}
+
+\begin{outline}
+	\1 Különböző alappontok esetén az eddigiekkel azonos módon járunk el.
+	\1 Elsőrendű osztott differenciák: $f[x_i,x_i] = f'(x_i)$ \;\; ($i=0,...,k$)
+	\1 $k$-adrendű osztott differenciák: ($i=0,...,m_k-1$)
+		\2 $f[x_i,...,x_i] = f[x_i \text{ k-szor}] = f^{(k)}(x_i) \;/\; k!$
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Definiálja az interpolációs spline-okat! 4p.}
+
+\begin{outline}
+	\1 Legyen $a = x_0 < ... < x_n = b$ és $l_k = [x_{k-1};x_k]$ részintervallum
+	\1 $S_\ell : [a;b] \to \mathbb{R}$ egy $\ell$-edfokú interpolációs spline, ha:
+		\2 $S_\ell |_{l_k} \in P_\ell$ \;\; (intervallumra szűkítése egy $\ell$-edfokú polinom)
+		\2 $S_\ell \in C^{(\ell-1)}[a;b]$
+		\2 $S_\ell(x_i) = f(x_i)$ \;\; (ez nem teljesül $\implies$ sima spline, nem interpolációs)
+\end{outline}
+
+\subsubsection{Írja le köbös spline-ok esetén a természetes peremfeltételt! 2p.}
+
+\begin{outline}
+	\1 $S''_3(a) = 0$ és $S''_3(b) = 0$
+	\1 Jelentése: spline a végpontokban nem kanyarodik
+\end{outline}
+
+\subsubsection{Írja le köbös spline-ok esetén az Hermite-féle peremfeltételt! 2p.}
+
+\begin{outline}
+	\1 $S'_3(a) = f'(a)$ és $S'_3(b) = f'(b)$
+	\1 Jelentése: spline a végpontokba megy
+\end{outline}
+
+\subsubsection{Írja le köbös spline-ok esetén a periodikus peremfeltételt! 2p.}
+
+\begin{outline}
+	\1 Csak periodikus függvények közelítése esetén érvényes,
+	ha $[a;b]$ a periódus többszöröse (ekkor $f(a)=f(b)$)
+	\1 Feltétel: $S'_3(a) = S'_3(b)$ és $S''_3(a) = S''_3(b)$
+\end{outline}
+
+\subsubsection{Adja meg az $(x-x_k)^\ell_+$-el jelölt függvény definícióját! 2p.}
+
+\begin{outline}
+	\1 Neve: jobb oldali hatványfüggvény
+	\1 $(x-x_k)^\ell_+ = \begin{cases}
+		(x-x_k)^\ell & \text{ha } x \ge x_k \\
+		0 & \text{ha } x < x_k
+	\end{cases}$
+\end{outline}
+
+\pagebreak
+
+\subsection{Második ZH}
+
+\begin{outline}
+	\1 Ezeket nem tanultam meg végül, így könnyen lehet, hogy hibásak: nem volt lehetőségem észre venni a hibákat bennük.
+\end{outline}
+
+\subsubsection{Definiálja a B-spline-okat a tulajdonságaival! 4p.}
+
+\begin{outline}
+	\1 $B_{\ell,k} \in S_\ell(\Omega_\infty)$ spline-ok B-spline-ok, ha:
+		\2 $\forall x \in \mathbb{R}: B_{\ell,k}(x) \ge 0$
+		\2 $\text{supp}(B_{\ell,k})$ minimális
+		\2 $\forall x \in \mathbb{R}: \sum_{k \in \mathbb{Z}} B_{\ell,k}(x) \equiv 1$
+\end{outline}
+
+\subsubsection{Írja fel az elsőfokú B-spline képletét! 2p.}
+
+$$B_{1,k}(x) = \begin{cases}
+	\frac{x-x_k}{x_{k+1} - x_k} & \text{ha } x \in [x_k;x_{k+1}) \\
+	\frac{x_{k+2}-x}{x_{k+2} - x_{k+1}} & \text{ha } x \in [x_{k+1};x_{k+2}) \\
+	0 & \text{különben}
+\end{cases}$$
+
+\subsubsection{Írja le a B-spline-okkal történő előállításról szóló tételt! 2p.}
+
+$$
+\forall S \in S_\ell(\Omega_\infty): \exists k \in \mathbb{Z}, c_k \in \mathbb{R}:
+S(x) = \sum_{k=-\infty}^{\infty} c_k * B_{\ell,k}(x)
+$$
+
+$$
+\forall S \in S_\ell(\Omega_n): \exists c_{-\ell}, ..., c_{n-1} \in \mathbb{R}:
+S(x) = \sum_{k=-\ell}^{n-1} c_k * B_{\ell,k}(x)
+$$
+
+\subsubsection{Milyen tételt tanult a Hilbert-térbeli approximációra? 4p.}
+
+\begin{outline}
+	\1 Legyen $H$ Hilbert tér, $f \in H$ és $H' \subset H$ zárt altér
+	\1 Ekkor $\exists! f' \in H': ||f - f'||=\inf\{ ||f-h'|| \;:\; h' \in H' \}$ és $f - f' \bot H'$
+\end{outline}
+
+\subsubsection{Véges dimenziós esetben hogyan oldható meg a Hilbert-térbeli approximációs feladat? Írja fel a távolság képletét is! 5p.}
+
+\begin{outline}
+	\1 $Gc=b$ ahol $G=(<g_i,g_j>)^n_{j,i=1}$ és $c=(c_i)^n_{i=1}$ és $b=(<f,g_j>)^n_{j=1}$
+	\1 Legjobban közelítő elem távolsága: $d^2 = ||f-f'||^2=||f||^2-b^Tc$
+\end{outline}
+
+\pagebreak
+
+\subsubsection{Mit nevezünk Gauss-féle normálegyenleteknek? 2p.}
+
+\begin{outline}
+	\1 $n$: keresett polinom fokszáma
+	\1 $N$: alappontok száma, $i \in [1;N]$
+\end{outline}
+
+$$
+\begin{bmatrix}
+\sum x_i^0 & \sum x_i^1 & \dots & \sum x_i^n \\
+\sum x_i^1 & \sum x_i^2 & \dots & \sum x_i^{n+1} \\
+\vdots & & & \vdots \\
+\sum x_i^n & \sum x_i^{n+1} & \dots & \sum x_i^{2n}
+\end{bmatrix}
+*
+\begin{bmatrix} a_0 \\ a_1 \\ \vdots \\ a_n \end{bmatrix}
+=
+\begin{bmatrix} \sum x_i^0 y_i \\ \sum x_i^1 y_i \\ \vdots \\ \sum x_i^n y_i \end{bmatrix}
+$$
+
+\subsubsection{Definiálja a legkisebb négyzetek módszerének feladatát! 2p.}
+
+\begin{outline}
+	\1 Adottak $x_1,...,x_N \in [a,b]$ különböző alappontok
+	és $y_i,...,y_N \in \mathbb{R}$ függvényértékek
+	\1 Feladat: $p_n \in P_n$ polinom meghatározása, hogy:
+		\2 $n+1 \le N$, általában $n << N$
+		\2 $\sum_{i=1}^N (y_i - p_n(x_i))^2$ minimális
+\end{outline}
+
+\subsubsection{Milyen két tételt tanult az ortogonális polinomok gyökeiről? 2p.}
+
+\begin{outline}
+	\1 $n \ge 1$ esetén $\tilde{p_n}$ ortogonális polinomnak $n$ db valós különböző gyöke van $[a,b]$-n
+	\1 $\tilde{p_{n-1}}$ és $\tilde{p_n}$ gyökei váltakozva helyezkednek el
+\end{outline}
+
+\subsubsection{Definiálja az interpolációs típusú kvadratúra formulákat! 2p.}
+
+\begin{outline}
+	\1 Kvadratúra formula: $\sum_{k=0}^n A_k f(x_k)$
+	\1 Interpolációs típúsa, ha ez is teljesül: $A_k =\int_{a}^{b} \ell_k(x) dx$ \;\; $(k=0,...,n)$
+\end{outline}
+
+\subsubsection{Milyen tételt tanult az interpolációs típusú kvadratúra formulák pontosságáról? 2p.}
+
+\begin{align*}
+	&\forall f \in P_n: \int_{a}^{b} f(x) dx = \sum_{k=0}^{n} A_k f(x_k) \\
+	&\Leftrightarrow \\
+	&A_k = \int_{a}^{b} \ell_k(x) dx \;\; (k=0,...,n)
+\end{align*}
+
+\pagebreak
+
+\subsubsection{Mi a jellemzője a Newton--Cotes-típusú kvadratúra formuláknak? 2p.}
+
+Az $\{x_i \;|\; i=0,...,n\}$ alappontok egyenletes felosztású pontok $[a;b]$-n.
+
+\subsubsection{Mi a jellemzője a Csebisev-típusú kvadratúra formuláknak? 2p.}
+
+$A_k \equiv A \;\; (k=0,...,n)$
+
+\subsubsection{Mi a jellemzője a Gauss-típusú kvadratúra formuláknak? 2p.}
+
+Maximális $(2n+1)$ fokszámig pontos formulák.
+
+\subsubsection{Írja fel az érintő formulát! 2p.}
+
+$$\int_{a}^{b} f \approx (b-a) * f(\frac{a+b}{2}) = E(f)$$
+
+\subsubsection{Írja fel a trapéz formulát! 2p.}
+
+$$\int_{a}^{b} f \approx \frac{b-a}{2} * (f(a) + f(b)) = T(f)$$
+
+\subsubsection{Írja fel a Simpson-formulát! 2p.}
+
+$$\int_{a}^{b} f \approx \frac{b-a}{6} * (f(a) + 4*f(\frac{a+b}{2}) + f(b)) = S(f)$$
+
+\subsubsection{Írja fel az érintő formula hibabecslését! 3p.}
+
+Legyen $f \in C^2[a;b]$, ekkor: $\exists \eta \in [a;b]:
+\int_{a}^{b}f-E(f) = \frac{(b-a)^3}{24} * f''(\eta)$
+
+\subsubsection{Írja fel a trapéz formula hibabecslését! 3p.}
+
+Legyen $f \in C^2[a;b]$, ekkor: $\exists \eta \in [a;b]:
+\int_{a}^{b}f-T(f) = -\frac{(b-a)^3}{12} * f''(\eta)$
+
+\subsubsection{Írja fel a Simpson-formula hibabecslését! 3p.}
+
+Legyen $f \in C^4[a;b]$, ekkor: $\exists \eta \in [a;b]:
+\int_{a}^{b}f-S(f) = -\frac{(b-a)^5}{2880} * f^{(4)}(\eta)$
+
+\pagebreak
+
+\subsubsection{Milyen tételt tanult a Gauss típusú kvadratúra formulák pontosságáról? 3p.}
+
+\begin{outline}
+	\1 Előadás diákon tétel kimondást nem találtam, csak az alábbit
+	\1 Maximálisan $2n+1$ fokszámig pontosak
+\end{outline}
+
+\end{document}
