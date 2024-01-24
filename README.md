@@ -22,3 +22,9 @@ a GitHub nem túl kényelmes PDF nézegetője helyett a böngésző beépített 
 | 2022-23-1 | IP-18TKHE/G | Telekommunikációs hálózatok |  [link](telekomm/README.md) |
 | 2022-23-1 | IP-18bAB2E/G | Adatbázisok II |  [link](adatb2/README.md) |
 | 2022-23-1 | IP-18bNM2EG | Numerikus módszerek II |  [link](nummód2/README.md) |
+
+## ELTE IK Proginf MSc, Szoftvertechnológia szakirány (kezdés éve: 2023)
+
+| Félév     | Tárgy kódja | Tárgy neve | Link |
+|:---------:|:-----------:|:----------:|:----:|
+| 2023-24-1 | IPM-18sztTPNYPE | Programozási nyelvek és paradigmák | [link](paradigm/README.md) |
