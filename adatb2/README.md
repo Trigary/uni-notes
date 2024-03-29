@@ -6,9 +6,9 @@
 
 Az ellenőrző kérdések két részre vannak bontva.
 
-[Link kérdések első feléhez](https://nbviewer.org/github/Trigary/uni-notes/blob/master/adatb2/előadás/adatb2-ea-zh1.pdf)
+[Link kérdések első feléhez](https://nbviewer.org/github/Trigary/uni-notes/blob/master/adatb2/előadás/adatb2-ea-zh1.pdf) [Tanulást segítő kvíz](https://trigary.github.io/quiz-presenter/?src=https%3A%2F%2Fraw.githubusercontent.com%2FTrigary%2Funi-notes%2Fmaster%2Fadatb2%2Fel%C5%91ad%C3%A1s%2Fquiz-presenter-zh1.json)
 
-[Link kérdések második feléhez](https://nbviewer.org/github/Trigary/uni-notes/blob/master/adatb2/előadás/adatb2-ea-zh2.pdf)
+[Link kérdések második feléhez](https://nbviewer.org/github/Trigary/uni-notes/blob/master/adatb2/előadás/adatb2-ea-zh2.pdf) [Tanulást segítő kvíz](https://trigary.github.io/quiz-presenter/?src=https%3A%2F%2Fraw.githubusercontent.com%2FTrigary%2Funi-notes%2Fmaster%2Fadatb2%2Fel%C5%91ad%C3%A1s%2Fquiz-presenter-zh2.json)
 
 ## Gyakorlati jegyzet
 
