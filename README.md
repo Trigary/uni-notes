@@ -28,3 +28,4 @@ a GitHub nem túl kényelmes PDF nézegetője helyett a böngésző beépített 
 | Félév     | Tárgy kódja | Tárgy neve | Link |
 |:---------:|:-----------:|:----------:|:----:|
 | 2023-24-1 | IPM-18sztTPNYPE | Programozási nyelvek és paradigmák | [link](paradigm/README.md) |
+| 2023-24-2 | IPM-22sztORSIE  | Osztott rendszerek specifikációja és implementációja | [link](orsi/README.md) |
