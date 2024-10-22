@@ -4,8 +4,6 @@
 
 Készült Kozsik Tamás előadásai alapján, lektorálás nélkül.
 
-A minta vizsga-ZH megoldása a gyakorlati (Eiffel) jegyzet végén található.
-
-[Vizsga tételek kidolgozás link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/paradigm/tételek/pnyp-tételek.pdf)
+A minta vizsga-ZH egy megoldása a gyakorlati (Eiffel) jegyzet végén található.
 
 [Gyakorlati (Eiffel) jegyzet link](https://nbviewer.org/github/Trigary/uni-notes/blob/master/paradigm/eiffel/pnyp-eiffel.pdf)
