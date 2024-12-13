@@ -32,88 +32,134 @@ Készítsünk egy feature-t, amely a gráf mélységi bejárását végezi el. A
 class
     DIGRAPH [T -> HASHABLE]
 
+--Non-conforming inheritance doesn't work because we rename the creation
+--  procedure the HASH_TABLE superclass is trying to use
 inherit
-    HASH_TABLE [attached ARRAYED_SET[T], attached T]
-        rename make as init, count as node_count, has as has_node
-        export {HASH_TABLE} all --clients should only use the features declared in the DIGRAPH class
-            {ANY} node_count, has_node
-        end
+	HASH_TABLE [attached ARRAYED_SET[attached T], attached T]
+		rename make as init, count as node_count, has_key as has_node
+		export
+			{HASH_TABLE} all --Don't let clients modfify the contents directly;
+			                 --  force them to use e.g. add_node
+			{ANY} node_count, has_node
+		end
 
 create init, union
 
 feature
     add_node(node: attached T)
-        require
-            node_not_present: not has_node(node)
-        do
-            extend(create{ARRAYED_SET[T]}.make(0), node)
-        ensure
-            node_present: has_node(node)
-            node_count_increased: node_count ~ old node_count + 1
-            edge_count_same: edge_count ~ old edge_count
-        end
+    require
+        not_exists: not has_node(node)
+    do
+        put(create {ARRAYED_SET[attached T]}.make(0), node)
+    ensure
+        created: has_node(node)
+        node_count_increased: node_count = old node_count + 1
+        --edge_count_same: edge_count = old edge_count
+    end
 
     add_edge(node_from, node_to: attached T)
-        require
-            node_from_present: has_node(node_from)
-            node_to_present: has_node(node_to)
-            edge_not_present: not has_edge_between(node_from, node_to)
-        do
-            definite_item(node_from).extend(node_to)
-        ensure
-            edge_present: has_edge_between(node_from, node_to)
-            edge_count_increased: edge_count > old edge_count --increases by 2 in GRAPH
-            node_count_same: node_count ~ old node_count
-        end
-
-    has_edge_between(node_from, node_to: attached T): BOOLEAN
-        require
-            node_from_present: has_node(node_from)
-            node_to_present: has_node(node_to)
-        do
-            Result := definite_item(node_from).has(node_to)
-        ensure
-            frame: Current ~ old Current
-        end
-
-    edge_count: INTEGER
-        do
-            across Current as i
-            from Result := 0
-            loop Result := Result + i.item.count
-            end
-        ensure
-            result_positive: Result >= 0
-            frame: Current ~ old Current
-        end
-
-    depth_first_traverse(root: attached T; visitor: attached PROCEDURE[attached T])
     require
-        root_present: has_node(root)
+        edge_not_exists: not has_edge(node_from, node_to)
+        endpoints_exist: has_node(node_from) and has_node(node_to)
+    do
+        check attached item(node_from) as attached_array then
+            attached_array.extend(node_to)
+        end
+    ensure
+        created: has_edge(node_from, node_to)
+        node_count_same: node_count = old node_count
+        --edge_count_increased: edge_count >= old edge_count + 1 --Increases by 2 in undirected graphs
+    end
+
+    has_edge(node_from, node_to: attached T): BOOLEAN
+    require
+        endpoints_exist: has_node(node_from) and has_node(node_to)
+    do
+        check attached item(node_from) as attached_array then
+            Result := attached_array.has(node_to)
+        end
+    ensure
+        frame: Current ~ old Current
+    end
+
+feature {NONE}
+    union(a, b: attached like Current)
+    do
+        init(10)
+        copy(a)
+        --First add all nodes, only then can we add edges
+        from
+            b.start
+        until
+            b.off
+        loop
+            if not has_node(b.key_for_iteration) then
+                add_node(b.key_for_iteration)
+            end
+            b.forth
+        end
+        from
+            b.start
+        until
+            b.off
+        loop
+            from
+                b.item_for_iteration.start
+            until
+                b.item_for_iteration.off
+            loop
+                if not has_edge(b.key_for_iteration, b.item_for_iteration.item) then
+                    add_edge(b.key_for_iteration, b.item_for_iteration.item)
+                end
+                b.item_for_iteration.forth
+            end
+
+            b.forth
+        end
+    ensure
+        node_count_min: a.node_count <= node_count and b.node_count <= node_count
+        node_count_max: node_count <= a.node_count + b.node_count
+        --edge_count_min: a.edge_count <= edge_count and b.edge_count <= edge_count
+        --edge_count_max: edge_count <= a.edge_count + b.edge_count
+    end
+
+feature
+    depth_first_traverse(start_node: attached T; visitor: attached PROCEDURE[attached T])
+    require
+        valid_start: has_node(start_node)
     local
         discovered: attached ARRAYED_SET[attached T]
-        visited_count: INTEGER
         to_visit: attached ARRAYED_STACK[attached T]
+        visited_count: INTEGER
         v: attached T
     do
         from
-            create discovered.make(node_count)
-            visited_count := 0
-            create to_visit.make(node_count)
-            discovered.extend(root); to_visit.extend(root)
+            create discovered.make(0)
+            create to_visit.make(0)
+            discovered.put(start_node)
+            to_visit.put(start_node)
         invariant
             node_count >= discovered.count
-            discovered.count ~ visited_count + to_visit.count
+            discovered.count = visited_count + to_visit.count
         until
             to_visit.is_empty
         loop
-            v := to_visit.item; to_visit.remove
+            v := to_visit.item
+            to_visit.remove
             visitor(v)
             visited_count := visited_count + 1
-            across definite_item(v) as i loop
-                if not discovered.has(i.item) then
-                    discovered.extend(i.item)
-                    to_visit.extend(i.item)
+
+            check attached item(v) as attached_array then
+                from
+                    attached_array.start
+                until
+                    attached_array.off
+                loop
+                    if not discovered.has(attached_array.item) then
+                        discovered.put(attached_array.item)
+                        to_visit.put(attached_array.item)
+                    end
+                    attached_array.forth
                 end
             end
         variant
@@ -122,28 +168,6 @@ feature
     ensure
         frame: Current ~ old Current
     end
-
-feature {NONE}
-    union(x,y: like Current)
-        do
-            init(0)
-            copy(x)
-            across y as key_values loop
-                if not has_node(key_values.key) then
-                    add_node(key_values.key)
-                end
-                across key_values.item as value loop
-                    if not has_edge_between(key_values.key, value.item) then
-                        add_edge(key_values.key, value.item)
-                    end
-                end
-            end
-        ensure
-            node_count_greater_equal: node_count >= x.node_count and node_count >= y.node_count
-            node_count_at_most_sum: node_count <= x.node_count + y.node_count
-            edge_count_greater_equal: edge_count >= x.edge_count and edge_count >= y.edge_count
-            edge_count_at_most_sum: edge_count <= x.edge_count + y.edge_count
-        end
 
 end
 ~~~
@@ -159,18 +183,18 @@ inherit
         redefine add_edge
         end
 
-create init, union
+create init
 
 feature
     add_edge(node_from, node_to: attached T)
-        do
-            Precursor(node_from, node_to)
-            if node_from /~ node_to then
-                Precursor(node_to, node_from)
-            end
-        ensure then
-            edge_present_backward: has_edge_between(node_to, node_from)
+    do
+        Precursor(node_from, node_to)
+        if node_from /~ node_to then
+            Precursor(node_to, node_from)
         end
+    ensure then
+        edge_present_both_ways: has_edge(node_from, node_to) and has_edge(node_to, node_from)
+    end
 
 end
 ~~~
@@ -179,25 +203,33 @@ end
 
 ~~~eiffel
 local
-    g,g2,g3: attached GRAPH[INTEGER]
+    g1, g2, g3: attached DIGRAPH[INTEGER]
+    g4: attached GRAPH[INTEGER]
 do
-    create g.init(10)
-    g.add_node(11); g.add_node(12); g.add_node(13); g.add_node(14)
-    g.add_edge(11, 11); g.add_edge(11, 12); g.add_edge(11, 13); g.add_edge(13, 14)
-    g.depth_first_traverse(11, agent(v: INTEGER) do print(v); print("%N") end)
+    create g1.init(0)
+    g1.add_node(1); g1.add_node(2); g1.add_node(3)
+    g1.add_edge(1, 2); g1.add_edge(2, 3); g1.add_edge(3, 3)
 
-    print("%N")
+    --g1.add_node(1) --Contract violation
+    --g1.add_edge(1, 2) --Contract violation
+    --g1.add_edge(123, 1) --Contract violation
+    --print(g1.has_edge(1, 123)) --Contract violation
 
-    --g.add_node(11) --Constraint violation
-    --g.add_edge(11, 999) --Constraint violation
-    --g.add_edge(11, 12) --Constraint violation
-    --print(g.has_edge_between(11, 999)) --Constraint violation
+    create g2.init(0)
+    g2.add_node(3); g2.add_node(4); g2.add_node(5)
+    g2.add_edge(3, 5); g2.add_edge(3, 4); g2.add_edge(4, 5)
 
-    g2 := g
-    create g3.init(10)
-    g3.add_node(14); g.add_node(15)
-    g.add_edge(14, 15)
-    create g.union(g2,g3)
-    g.depth_first_traverse(11, agent(v: INTEGER) do print(v); print("%N") end)
+    create g3.union(g1, g2)
+    print("Actual output:   ")
+    g3.depth_first_traverse(1, agent(v: INTEGER) do print(v); print(" ") end)
+    print("%NExpected output: 1 2 3 4 5 %N")
+
+    create g4.init(0)
+    g4.add_node(1); g4.add_node(2); g4.add_node(3); g4.add_node(4)
+    g4.add_edge(1, 3); g4.add_edge(1, 2); g4.add_edge(2, 4); g4.add_edge(4, 4)
+
+    print("Actual output:   ")
+    g4.depth_first_traverse(1, agent(v: INTEGER) do print(v); print(" ") end)
+    print("%NExpected output: 1 2 4 3 %N")
 end
 ~~~
